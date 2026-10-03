@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex">
+  <title>Imagem de compartilhamento — Palanque Explosivo</title>
+  <style>
+    @font-face{font-family:Pixel;src:url('../assets/fonts/PressStart2P-Regular.ttf')}
+    @font-face{font-family:Chakra;src:url('../assets/fonts/ChakraPetch-Bold.ttf');font-weight:700}
+    *{box-sizing:border-box}body{margin:0;background:#252b46;color:#f4eddc}
+    .social-card{width:1200px;height:630px;position:relative;overflow:hidden;background:#252b46;text-align:center}
+    h1{position:absolute;top:48px;left:0;width:100%;margin:0;font:52px/1.4 Pixel,monospace;text-transform:uppercase;letter-spacing:-2px;text-shadow:4px 4px #f57962,8px 8px #101d3a}
+    canvas{position:absolute;top:178px;left:40px;width:1120px;height:392px;image-rendering:pixelated}
+    p{position:absolute;bottom:36px;left:0;width:100%;margin:0;font:700 28px Chakra,sans-serif;color:#f6c46c}
+  </style>
+</head>
+<body>
+  <main class="social-card">
+    <h1>Palanque<br>Explosivo</h1>
+    <canvas id="scene" width="640" height="224" aria-label="Personagens do jogo diante de Brasília"></canvas>
+    <p>Jogue grátis no navegador</p>
+  </main>
+  <script type="module">
+    import { drawTitleScene } from '../src/title-art.js';
+    drawTitleScene(document.querySelector('#scene').getContext('2d'), 0);
+    await document.fonts.ready;
+    document.body.dataset.ready = 'true';
+  </script>
+</body>
+</html>

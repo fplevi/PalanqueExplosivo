@@ -7,7 +7,7 @@ const output = path.join(root, 'dist');
 await mkdir(output, { recursive: true });
 
 // Publish only the files the browser needs, independently of repository layout.
-for (const entry of ['index.html', 'style.css', 'src', 'assets']) {
+for (const entry of ['index.html', 'style.css', 'sitemap.xml', 'src', 'assets']) {
   await cp(path.join(root, entry), path.join(output, entry), { recursive: true });
 }
 await writeFile(path.join(output, '.nojekyll'), '');
