@@ -57,11 +57,12 @@ export function drawCharacter(ctx, character, x, y, scale = 1, facing = 2, step 
       rect('#f4cc9b', 7, 8, 2, 2);
     }
     if (character.glasses) {
-      rect('#304246', 3, 5, 4, 1); rect('#304246', 9, 5, 4, 1);
-      rect('#304246', 3, 8, 4, 1); rect('#304246', 9, 8, 4, 1);
-      rect('#304246', 3, 6, 1, 2); rect('#304246', 6, 6, 1, 2);
-      rect('#304246', 9, 6, 1, 2); rect('#304246', 12, 6, 1, 2);
-      rect('#304246', 7, 6, 2, 1);
+      const glassesColor = character.glassesColor ?? '#304246';
+      rect(glassesColor, 3, 5, 4, 1); rect(glassesColor, 9, 5, 4, 1);
+      rect(glassesColor, 3, 8, 4, 1); rect(glassesColor, 9, 8, 4, 1);
+      rect(glassesColor, 3, 6, 1, 2); rect(glassesColor, 6, 6, 1, 2);
+      rect(glassesColor, 9, 6, 1, 2); rect(glassesColor, 12, 6, 1, 2);
+      rect(glassesColor, 7, 6, 2, 1);
     }
     if (character.beard) {
       rect(character.beard, 4, 9, 8, 3);

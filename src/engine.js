@@ -3,6 +3,20 @@ export const ARENA_WIDTH = 15;
 export const ARENA_HEIGHT = 13;
 const FLAME_DURATION = 0.55;
 
+function fallingBlockPath(arena) {
+  const cells = [];
+  let left = 1, top = 1, right = arena[0].length - 2, bottom = arena.length - 2;
+  const add = (x, y) => { if (arena[y][x] !== 'wall') cells.push({ x, y }); };
+  while (left <= right && top <= bottom) {
+    for (let x = left; x <= right; x++) add(x, top);
+    for (let y = top + 1; y <= bottom; y++) add(right, y);
+    if (top < bottom) for (let x = right - 1; x >= left; x--) add(x, bottom);
+    if (left < right) for (let y = bottom - 1; y > top; y--) add(left, y);
+    left++; top++; right--; bottom--;
+  }
+  return cells;
+}
+
 export function seededRandom(seed) {
   let state = seed >>> 0;
   return () => {
@@ -22,14 +36,15 @@ export function makeArena(random = Math.random) {
 }
 
 export class Match {
-  constructor({ arena = makeArena(), players, random = Math.random, duration = 150, items = [] } = {}) {
+  constructor({ arena = makeArena(), players, random = Math.random, duration = 150, items = [], lives = 1, difficulty = 1 } = {}) {
     this.arena = arena.map(row => [...row]);
     this.random = random;
     this.players = (players ?? [
       { id: 'human', x: 1, y: 1 }, { id: 'bot1', x: 13, y: 11, bot: true },
       { id: 'bot2', x: 13, y: 1, bot: true }, { id: 'bot3', x: 1, y: 11, bot: true },
     ]).map(player => ({
-      alive: true, capacity: 1, range: 2, speed: 1, cooldown: 0, facing: 2,
+      alive: true, lives, capacity: 1, range: 2, speed: 1, cooldown: 0, facing: 2,
+      spawnX: player.x, spawnY: player.y, invulnerable: 0, respawning: false,
       fromX: player.x, fromY: player.y, moveDuration: 0.18, thinkIn: 0, ...player,
     }));
     this.bombs = [];
@@ -41,6 +56,14 @@ export class Match {
     this.status = 'running';
     this.winner = null;
     this.nextBomb = 0;
+    this.difficulty = Math.max(0, Math.min(1, difficulty));
+    this.eliminationGroups = [];
+    this.fallingBlocks = fallingBlockPath(this.arena);
+    this.fallIndex = 0;
+    this.nextFallAt = duration;
+    this.suddenDeathAt = duration;
+    this.suddenDeath = false;
+    this.warnedSuddenDeath = false;
   }
 
   walkable(x, y) {
@@ -49,7 +72,7 @@ export class Match {
 
   move(id, dx, dy) {
     const player = this.players.find(candidate => candidate.id === id);
-    if (this.status !== 'running' || !player?.alive || Math.abs(dx) + Math.abs(dy) !== 1) return false;
+    if (this.status !== 'running' || !player?.alive || player.respawning || Math.abs(dx) + Math.abs(dy) !== 1) return false;
     player.facing = DIRECTIONS.findIndex(([x, y]) => x === dx && y === dy);
     if (player.cooldown > 0 || !this.walkable(player.x + dx, player.y + dy)) return false;
     player.fromX = player.x;
@@ -70,7 +93,7 @@ export class Match {
 
   placeBomb(id) {
     const player = this.players.find(candidate => candidate.id === id);
-    if (this.status !== 'running' || !player?.alive) return false;
+    if (this.status !== 'running' || !player?.alive || player.respawning) return false;
     if (this.bombs.some(bomb => bomb.x === player.x && bomb.y === player.y)) return false;
     if (this.bombs.filter(bomb => bomb.owner === id).length >= player.capacity) return false;
     this.bombs.push({ id: this.nextBomb++, owner: id, x: player.x, y: player.y, range: player.range, fuse: 2 });
@@ -90,24 +113,88 @@ export class Match {
   tick(dt) {
     this.elapsed += dt;
     this.remaining = Math.max(0, this.remaining - dt);
-    for (const player of this.players) player.cooldown = Math.max(0, player.cooldown - dt);
+    this.tickDeaths = [];
+    for (const player of this.players) {
+      player.cooldown = Math.max(0, player.cooldown - dt);
+      player.invulnerable = Math.max(0, player.invulnerable - dt);
+    }
     for (const flame of this.flames) flame.life -= dt;
     this.flames = this.flames.filter(flame => flame.life > 0);
     for (const bomb of this.bombs) bomb.fuse -= dt;
     const due = this.bombs.filter(bomb => bomb.fuse <= 0.000001);
     if (due.length) this.explode(due);
+    this.dropBlocks();
     for (const player of this.players) {
-      if (player.alive && this.flames.some(flame => flame.x === player.x && flame.y === player.y)) {
-        player.alive = false;
-        this.events.push({ type: 'eliminated', id: player.id, x: player.x, y: player.y });
+      if (player.alive && !player.respawning && player.invulnerable <= 0 && this.flames.some(flame => flame.x === player.x && flame.y === player.y)) {
+        this.loseLife(player, 'explosion');
       }
     }
+    for (const player of this.players) if (player.alive && player.respawning) this.respawn(player);
+    if (this.tickDeaths.length) this.eliminationGroups.push([...this.tickDeaths]);
     this.actBots(dt);
     const survivors = this.players.filter(player => player.alive);
-    if (survivors.length <= 1 || this.remaining <= 0) {
+    if (survivors.length <= 1) {
       this.status = 'finished';
       this.winner = survivors.length === 1 ? survivors[0].id : null;
       this.events.push({ type: 'finished', winner: this.winner });
+    }
+  }
+
+  eliminate(player, cause) {
+    player.alive = false;
+    player.lives = 0;
+    player.respawning = false;
+    this.tickDeaths.push(player.id);
+    this.events.push({ type: 'eliminated', id: player.id, x: player.x, y: player.y, cause });
+  }
+
+  loseLife(player, cause) {
+    player.lives--;
+    this.events.push({ type: 'life-lost', id: player.id, lives: player.lives, cause });
+    if (player.lives <= 0) this.eliminate(player, cause);
+    else player.respawning = true;
+  }
+
+  respawn(player) {
+    const candidates = [];
+    for (let y = 1; y < this.arena.length - 1; y++) {
+      for (let x = 1; x < this.arena[y].length - 1; x++) {
+        if (this.arena[y][x] === 'floor') candidates.push({ x, y });
+      }
+    }
+    if (!candidates.length) { this.eliminate(player, 'no-space'); return; }
+    const hazards = this.forecast();
+    const cell = candidates.filter(({ x, y }) => this.walkable(x, y)
+      && !this.players.some(other => other !== player && other.alive && !other.respawning && other.x === x && other.y === y)
+      && !(hazards.get(`${x},${y}`) ?? []).some(window => window.start <= 2))
+      .sort((a, b) => Math.abs(a.x - player.spawnX) + Math.abs(a.y - player.spawnY)
+        - Math.abs(b.x - player.spawnX) - Math.abs(b.y - player.spawnY))[0];
+    if (!cell) return; // Wait for a temporary hazard to clear before reappearing.
+    player.x = player.fromX = cell.x; player.y = player.fromY = cell.y;
+    player.cooldown = 0; player.invulnerable = 2; player.respawning = false;
+    this.events.push({ type: 'respawned', id: player.id, x: cell.x, y: cell.y });
+  }
+
+  dropBlocks() {
+    if (!this.warnedSuddenDeath && this.elapsed >= this.suddenDeathAt - 5) {
+      this.warnedSuddenDeath = true;
+      this.events.push({ type: 'sudden-death-warning' });
+    }
+    if (!this.suddenDeath && this.elapsed + 0.000001 >= this.suddenDeathAt) {
+      this.suddenDeath = true;
+      this.events.push({ type: 'sudden-death' });
+    }
+    while (this.fallIndex < this.fallingBlocks.length && this.elapsed + 0.000001 >= this.nextFallAt) {
+      const { x, y } = this.fallingBlocks[this.fallIndex++];
+      this.arena[y][x] = 'crushed';
+      this.bombs = this.bombs.filter(bomb => bomb.x !== x || bomb.y !== y);
+      this.flames = this.flames.filter(flame => flame.x !== x || flame.y !== y);
+      this.items = this.items.filter(item => item.x !== x || item.y !== y);
+      for (const player of this.players) {
+        if (player.alive && !player.respawning && player.x === x && player.y === y) this.loseLife(player, 'crushed');
+      }
+      this.events.push({ type: 'block-fell', x, y });
+      this.nextFallAt += 0.5;
     }
   }
 
@@ -118,7 +205,7 @@ export class Match {
         const x = bomb.x + dx * distance;
         const y = bomb.y + dy * distance;
         const tile = arena[y]?.[x];
-        if (!tile || tile === 'wall') break;
+        if (!tile || tile === 'wall' || tile === 'crushed') break;
         cells.push({ x, y });
         if (tile === 'block' || this.bombs.some(other => other.x === x && other.y === y)) break;
       }
@@ -181,6 +268,10 @@ export class Match {
       const start = timings.get(bomb.id);
       for (const cell of cells.get(bomb.id)) add(cell.x, cell.y, start, start + FLAME_DURATION);
     }
+    for (let index = this.fallIndex; index < Math.min(this.fallIndex + 8, this.fallingBlocks.length); index++) {
+      const cell = this.fallingBlocks[index];
+      add(cell.x, cell.y, Math.max(0, this.nextFallAt - this.elapsed + (index - this.fallIndex) * 0.5), Infinity);
+    }
     return hazards;
   }
 
@@ -211,10 +302,10 @@ export class Match {
 
   actBots(dt) {
     for (const player of this.players) {
-      if (!player.bot || !player.alive) continue;
+      if (!player.bot || !player.alive || player.respawning) continue;
       player.thinkIn -= dt;
       if (player.thinkIn > 0 || player.cooldown > 0) continue;
-      player.thinkIn = 0.08;
+      player.thinkIn = 0.08 + (1 - this.difficulty) * 0.3;
       const route = this.escapeRoute(player);
       if (route?.length) {
         this.move(player.id, ...route[0]);
@@ -224,7 +315,7 @@ export class Match {
       const hypothetical = { id: -1, owner: player.id, x: player.x, y: player.y, range: player.range, fuse: 2 };
       const targetInBlast = this.blastCells(hypothetical).some(cell =>
         this.arena[cell.y][cell.x] === 'block' || this.players.some(other => other.id !== player.id && other.alive && other.x === cell.x && other.y === cell.y));
-      if (targetInBlast && this.random() < 0.75) {
+      if (targetInBlast && this.random() < 0.35 + this.difficulty * 0.4) {
         const escape = this.escapeRoute(player, hypothetical);
         if (escape?.length && this.placeBomb(player.id)) {
           this.move(player.id, ...escape[0]);
@@ -235,7 +326,7 @@ export class Match {
       const opponents = this.players.filter(other => other.alive && other.id !== player.id);
       const goals = [...this.items.filter(item => (item.revealAt ?? 0) <= this.elapsed), ...opponents];
       const distance = (x, y) => goals.length ? Math.min(...goals.map(goal => Math.abs(goal.x - x) + Math.abs(goal.y - y))) : 0;
-      const choices = DIRECTIONS.map(([dx, dy]) => ({ dx, dy, x: player.x + dx, y: player.y + dy, jitter: this.random() * 2.6 }))
+      const choices = DIRECTIONS.map(([dx, dy]) => ({ dx, dy, x: player.x + dx, y: player.y + dy, jitter: this.random() * (4.6 - this.difficulty * 2) }))
         .filter(choice => this.walkable(choice.x, choice.y) && !hazards.has(`${choice.x},${choice.y}`))
         .sort((a, b) => distance(a.x, a.y) + a.jitter - distance(b.x, b.y) - b.jitter);
       if (choices.length) this.move(player.id, choices[0].dx, choices[0].dy);
@@ -257,6 +348,9 @@ export class Match {
       bombs: this.bombs.map(bomb => ({ ...bomb })), flames: this.flames.map(flame => ({ ...flame })),
       items: this.items.map(item => ({ ...item })), remaining: this.remaining,
       elapsed: this.elapsed, status: this.status, winner: this.winner,
+      eliminationGroups: this.eliminationGroups.map(group => [...group]), suddenDeath: this.suddenDeath,
+      nextBlock: this.fallingBlocks[this.fallIndex] && this.nextFallAt - this.elapsed <= 5
+        ? { ...this.fallingBlocks[this.fallIndex], in: Math.max(0, this.nextFallAt - this.elapsed) } : null,
     };
   }
 }
