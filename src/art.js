@@ -28,6 +28,14 @@ export function drawCharacter(ctx, character, x, y, scale = 1, facing = 2, step 
   rect('#151f27', 3, 24 + walk, 5, 2);
   rect('#151f27', 9, 25 - walk, 5, 2);
   if (character.style === 'long') rect(character.hair, 2, 3, 12, 12);
+  if (character.style === 'afro') {
+    rect(character.hair, 4, -2, 8, 2);
+    rect(character.hair, 2, 0, 12, 2);
+    rect(character.hair, 1, 2, 14, 2);
+    rect(character.hair, 0, 4, 16, 5);
+    rect(character.hair, 1, 9, 14, 2);
+    rect(character.hair, 2, 11, 12, 1);
+  }
   rect(dark, 3, 1, 10, 12);
   rect(dark, 2, 3, 12, 7);
   rect(character.skin, 3, 3, 10, 8);
@@ -36,6 +44,15 @@ export function drawCharacter(ctx, character, x, y, scale = 1, facing = 2, step 
   rect(character.hair, 2, 4, 2, 4);
   rect(character.hair, 12, 4, 2, 4);
   rect(character.hair, 4, 0, 7, 2);
+  if (character.style === 'afro') {
+    rect(character.hair, 1, 3, 3, 7);
+    rect(character.hair, 12, 3, 3, 7);
+    rect(character.hair, 2, 10, 2, 2);
+    rect(character.hair, 12, 10, 2, 2);
+    for (const [hx, hy] of [[4, -1], [8, -2], [11, 0], [2, 3], [13, 4], [1, 7], [14, 8]]) {
+      rect('#ffffff12', hx, hy, 1, 1);
+    }
+  }
   if (character.style === 'side') {
     rect(character.hair, 9, 3, 4, 3);
     rect('#ffffff28', 4, 2, 5, 1);

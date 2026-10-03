@@ -2,6 +2,7 @@ import { Match, makeArena, seededRandom } from './engine.js';
 import { CHARACTERS, characterFor } from './characters.js';
 import { drawCharacter, renderArena } from './art.js';
 import { drawTitleScene } from './title-art.js';
+import { Story, BOSSES, STORY_SAVE_KEY, storyCharacters } from './story.js';
 
 const $ = id => document.getElementById(id);
 const arena = $('arena');
@@ -22,6 +23,52 @@ let audio;
 let helpPaused = false;
 let previousTime = performance.now();
 let seed = 2026;
+let mode = 'quick';
+let story = null;
+let primaryAction = null;
+let secondaryAction = null;
+let watchAction = null;
+let storageAvailable = true;
+let savedStory = readStory();
+
+function readStory() {
+  try { return Story.restore(localStorage.getItem(STORY_SAVE_KEY)); }
+  catch { storageAvailable = false; return null; }
+}
+
+function refreshSave() {
+  $('resume-story').hidden = !savedStory;
+  if (savedStory) $('resume-story').textContent = `Retomar: ${characterFor(savedStory.character).name} · Fase ${savedStory.stage + 1}/11`;
+  $('save-notice').hidden = storageAvailable;
+  $('save-notice').textContent = 'Este navegador não permitiu salvar o progresso. A história continua enquanto o jogo estiver aberto.';
+}
+
+function saveStory() {
+  savedStory = story.completed ? null : Story.restore(story.serialize());
+  try {
+    if (story.completed) localStorage.removeItem(STORY_SAVE_KEY);
+    else localStorage.setItem(STORY_SAVE_KEY, story.serialize());
+  } catch { storageAvailable = false; }
+  refreshSave();
+}
+
+function chooseMode(value) {
+  mode = value; story = null;
+  $('mode-label').textContent = mode === 'story' ? 'Modo história' : 'Jogo rápido';
+  $('selection-hint').textContent = mode === 'story'
+    ? '11 fases · 3 vidas por fase. Lula e Flávio são os chefões do primeiro turno.'
+    : 'Uma partida contra três computadores.';
+  for (const button of $('roster').children) {
+    const locked = mode === 'story' && BOSSES.includes(button.dataset.character);
+    button.disabled = locked;
+    const character = characterFor(button.dataset.character);
+    button.setAttribute('aria-label', locked ? character.name + ', chefão exclusivo do Modo história' : 'Selecionar ' + character.fullName + ', ' + character.party);
+    button.querySelector('small').textContent = locked ? 'Chefão' : character.party;
+  }
+  if (mode === 'story' && BOSSES.includes(selected.id)) selectCharacter(storyCharacters()[0]);
+  else selectCharacter(selected);
+  showScreen('selection');
+}
 
 const announce = text => { $('announcement').textContent = text; };
 
@@ -54,6 +101,7 @@ function showScreen(target, { record = true, replace = false, focus = true } = {
   screen = target;
   pressed.clear();
   if (target !== 'game') { phase = 'idle'; match = null; helpPaused = false; }
+  if (target === 'home') refreshSave();
   document.body.dataset.screen = target;
   for (const section of document.querySelectorAll('main > [data-screen]')) section.hidden = section.dataset.screen !== target;
   for (const step of document.querySelectorAll('[data-step]')) {
@@ -83,11 +131,12 @@ function paintAvatar(canvas, character, scale = 3) {
 }
 
 function selectCharacter(character, focus = false) {
+  if (mode === 'story' && BOSSES.includes(character.id)) return;
   selected = character;
   for (const button of $('roster').children) {
     const active = button.dataset.character === selected.id;
     button.setAttribute('aria-pressed', String(active));
-    button.tabIndex = active ? 0 : -1;
+    button.tabIndex = active && !button.disabled ? 0 : -1;
     if (active && focus) button.focus({ preventScroll: true });
   }
   $('selected-name').textContent = character.name;
@@ -139,28 +188,46 @@ function drawParticipants(view) {
     avatar.width = 48; avatar.height = 84; avatar.setAttribute('aria-hidden', 'true');
     const copy = document.createElement('div');
     const name = document.createElement('strong'); name.textContent = character.name;
-    const tag = document.createElement('small'); tag.textContent = player.bot ? 'Bot' : 'Você';
+    const tag = document.createElement('small');
+    tag.textContent = `${player.bot ? 'Computador' : 'Você'} · ${player.lives} ${player.lives === 1 ? 'vida' : 'vidas'}`;
     copy.append(name, tag); card.append(avatar, copy); $('participants').append(card);
     paintAvatar(avatar, character);
   }
 }
 
-function overlay(title, text, buttonText, allowSelection = false) {
+function overlay(title, text, buttonText, allowSelection = false, actions = {}) {
+  primaryAction = actions.primary ?? null;
+  secondaryAction = actions.secondary ?? (() => showScreen('selection'));
+  watchAction = actions.watch ?? null;
   $('arena-overlay').hidden = false;
   $('arena-overlay').classList.toggle('countdown', phase === 'countdown');
   $('overlay-title').textContent = title;
   $('overlay-text').textContent = text;
   $('overlay-button').hidden = !buttonText;
   $('overlay-secondary').hidden = !allowSelection;
+  $('overlay-secondary').textContent = actions.secondaryLabel ?? 'Trocar personagem';
+  $('overlay-watch').hidden = !watchAction;
+  $('arena-overlay').classList.toggle('game-over', title === 'GAME OVER');
   if (buttonText) $('overlay-button').textContent = buttonText;
 }
 
 function start() {
+  if (mode === 'story') {
+    story = new Story(selected.id, seededRandom(++seed * 991));
+    saveStory();
+  }
+  startMatch();
+}
+
+function startMatch() {
   const random = seededRandom(++seed * 991);
-  match = new Match({ arena: makeArena(random), players: participantConfig(random), random });
+  match = new Match({ arena: makeArena(random), players: mode === 'story' ? story.participants() : participantConfig(random), random,
+    lives: mode === 'story' && !story.tie ? 3 : 1, difficulty: mode === 'story' ? 0.2 + story.stage * 0.08 : 1 });
   phase = 'countdown'; countdown = 3; countdownNumber = 0;
   showScreen('game');
   drawParticipants(match.snapshot());
+  $('game-title').textContent = mode === 'story' ? story.title : 'Jogo rápido · Praça da Disputa';
+  $('game-back').lastChild.textContent = mode === 'story' ? ' Sair' : ' Personagens';
   $('match-state').textContent = 'Prepare-se';
   $('timer').textContent = '02:30'; $('timer').classList.remove('danger-timer');
   $('pause-button').disabled = true;
@@ -168,6 +235,60 @@ function start() {
   for (const [id, value] of [['bomb-stat', 1], ['range-stat', 2], ['speed-stat', 1]]) $(id).textContent = value;
   overlay('3', 'A partida já vai começar.');
   announce('A partida começa em três segundos.');
+}
+
+function retryStory() {
+  if (story.spectating) {
+    story.stage = story.order.length;
+    story.finalists = [];
+  }
+  story.restart(); saveStory(); startMatch();
+}
+
+function failStory() {
+  phase = 'failure'; pressed.clear(); $('pause-button').disabled = true;
+  overlay('GAME OVER', 'Você falhou em acabar com o ciclo de amor e ódio', 'Tentar novamente', true, {
+    primary: retryStory, secondary: () => showScreen('home'), secondaryLabel: 'Sair',
+    watch: story.semifinal ? () => {
+      story.spectating = true;
+      saveStory();
+      phase = 'playing'; $('arena-overlay').hidden = true; $('pause-button').disabled = false;
+      arena.focus({ preventScroll: true });
+      if (match.snapshot().status === 'finished') finishStory(match.snapshot());
+    } : null,
+  });
+  $('match-state').textContent = 'Fim de jogo';
+  $('overlay-button').focus({ preventScroll: true });
+  announce('Game over. Você falhou em acabar com o ciclo de amor e ódio.');
+}
+
+function finishStory(view) {
+  const outcome = story.resolve(view);
+  if (outcome.kind === 'defeat') { failStory(); return; }
+  phase = 'result'; pressed.clear(); $('pause-button').disabled = true;
+  if (outcome.kind === 'complete') {
+    saveStory();
+    const winner = characterFor(outcome.winner).name;
+    const title = story.spectating ? 'Segundo turno encerrado' : 'Vitória!';
+    const text = story.spectating ? `${winner} venceu o segundo turno. Você falhou em acabar com o ciclo de amor e ódio`
+      : `${winner} venceu! Você acabou com o ciclo de amor e ódio.`;
+    overlay(title, text, story.spectating ? 'Tentar novamente' : 'Nova história', true, {
+      primary: story.spectating ? retryStory : () => chooseMode('story'), secondary: () => showScreen('home'), secondaryLabel: 'Sair',
+    });
+  } else {
+    saveStory();
+    if (story.spectating) { startMatch(); return; }
+    const title = outcome.kind === 'tie' ? 'Desempate!' : story.final ? 'Segundo turno!' : 'Fase vencida!';
+    const opponents = story.participants().filter(player => player.character !== selected.id).map(player => characterFor(player.character).name).join(' e ');
+    const text = outcome.kind === 'tie' ? 'A vaga ficou empatada. Nova arena, uma vida por participante.'
+      : story.final ? `Você se classificou. A final será contra ${opponents}.` : `Próximo confronto: ${opponents}. Todos começam com três vidas.`;
+    overlay(title, text, outcome.kind === 'tie' ? 'Jogar desempate' : 'Próxima fase', true, {
+      primary: startMatch, secondary: () => showScreen('home'), secondaryLabel: 'Sair',
+    });
+  }
+  $('match-state').textContent = 'Partida encerrada';
+  $('overlay-button').focus({ preventScroll: true });
+  announce($('overlay-title').textContent + ' ' + $('overlay-text').textContent);
 }
 
 function setPauseButton(paused) {
@@ -183,13 +304,14 @@ function togglePause() {
   const view = match.snapshot();
   const paused = view.status === 'paused';
   setPauseButton(paused);
-  $('match-state').textContent = paused ? 'Partida pausada' : view.players[0].alive ? 'Valendo' : 'Você caiu. Assista aos bots.';
+  $('match-state').textContent = paused ? 'Partida pausada' : view.suddenDeath ? 'Morte súbita' : view.players.some(player => player.id === 'human' && player.alive && !player.bot) ? 'Valendo' : 'Assistindo à disputa';
   if (paused) overlay('Pausa', 'A partida está esperando por você.', 'Continuar');
   else { $('arena-overlay').hidden = true; arena.focus({ preventScroll: true }); }
   announce(paused ? 'Partida pausada.' : 'Partida retomada.');
 }
 
 function finish(view) {
+  if (mode === 'story') { finishStory(view); return; }
   phase = 'result'; pressed.clear(); $('pause-button').disabled = true;
   const winner = view.players.find(player => player.id === view.winner);
   const title = winner ? winner.id === 'human' ? 'Vitória!' : 'Fim de jogo' : 'Empate!';
@@ -207,13 +329,20 @@ function openHelp() {
 }
 
 $('home-button').addEventListener('click', () => showScreen('home'));
-$('begin-button').addEventListener('click', () => showScreen('selection'));
+$('begin-button').addEventListener('click', () => chooseMode('quick'));
+$('story-button').addEventListener('click', () => chooseMode('story'));
+$('resume-story').addEventListener('click', () => {
+  if (!savedStory) return;
+  const restored = Story.restore(savedStory.serialize());
+  chooseMode('story'); story = restored; selectCharacter(characterFor(story.character)); startMatch();
+});
 $('selection-back').addEventListener('click', () => showScreen('home'));
-$('game-back').addEventListener('click', () => showScreen('selection'));
+$('game-back').addEventListener('click', () => showScreen(mode === 'story' ? 'home' : 'selection'));
 $('start-button').addEventListener('click', start);
 $('pause-button').addEventListener('click', togglePause);
-$('overlay-button').addEventListener('click', () => phase === 'result' ? start() : togglePause());
-$('overlay-secondary').addEventListener('click', () => showScreen('selection'));
+$('overlay-button').addEventListener('click', () => primaryAction ? primaryAction() : phase === 'result' ? startMatch() : togglePause());
+$('overlay-secondary').addEventListener('click', () => secondaryAction?.());
+$('overlay-watch').addEventListener('click', () => watchAction?.());
 $('help-button').addEventListener('click', openHelp);
 $('home-help').addEventListener('click', openHelp);
 $('close-help').addEventListener('click', () => dialog.close());
@@ -236,7 +365,7 @@ window.addEventListener('keydown', event => {
   const key = event.key.toLowerCase();
   const onButton = event.target instanceof Element && event.target.closest('button');
   if (screen === 'home') {
-    if (key === 'enter' && (!onButton || event.target === $('begin-button'))) { event.preventDefault(); showScreen('selection'); }
+    if (key === 'enter' && !onButton) { event.preventDefault(); chooseMode('quick'); }
     return;
   }
   if (screen === 'selection') {
@@ -245,7 +374,9 @@ window.addEventListener('keydown', event => {
       event.preventDefault();
       const columns = window.matchMedia('(max-width: 740px)').matches ? 3 : 4;
       const offsets = { arrowleft: -1, arrowright: 1, arrowup: -columns, arrowdown: columns };
-      const next = (CHARACTERS.indexOf(selected) + offsets[key] + CHARACTERS.length) % CHARACTERS.length;
+      let next = CHARACTERS.indexOf(selected);
+      do { next = (next + offsets[key] + CHARACTERS.length) % CHARACTERS.length; }
+      while (mode === 'story' && BOSSES.includes(CHARACTERS[next].id));
       selectCharacter(CHARACTERS[next], true);
     } else if (key === 'enter' && (!onButton || event.target.closest('.character-card'))) { event.preventDefault(); start(); }
     return;
@@ -288,14 +419,25 @@ function updateGame(dt) {
       const card = document.querySelector('[data-player="' + event.id + '"]');
       card?.classList.add('dead');
       if (card) card.querySelector('small').textContent = 'Eliminado';
-      if (event.id === 'human') { $('match-state').textContent = 'Você caiu. Assista aos bots.'; announce('Você foi eliminado. Assista aos bots ou volte para a seleção.'); }
+      if (event.id === 'human') {
+        const copy = mode === 'story' ? 'Aguardando a classificação do primeiro turno.' : 'Você caiu. Assista aos bots.';
+        $('match-state').textContent = copy; announce(copy);
+      }
     }
+    if (event.type === 'life-lost' && event.id === 'human' && event.lives > 0) announce(`Você perdeu uma vida. Restam ${event.lives}.`);
+    if (event.type === 'sudden-death-warning') { $('match-state').textContent = 'Morte súbita em 5 segundos!'; announce('Morte súbita em cinco segundos. Fuja dos blocos sinalizados.'); }
+    if (event.type === 'sudden-death') { $('match-state').textContent = 'Morte súbita!'; announce('Morte súbita! Os blocos estão caindo.'); }
+  }
+  for (const player of view.players) {
+    const card = document.querySelector('[data-player="' + player.id + '"]');
+    if (card && player.alive) card.querySelector('small').textContent = `${player.bot ? 'Computador' : 'Você'} · ${player.lives} ${player.lives === 1 ? 'vida' : 'vidas'}${player.respawning ? ' · Voltando' : ''}`;
   }
   const seconds = Math.ceil(view.remaining);
-  $('timer').textContent = String(Math.floor(seconds / 60)).padStart(2, '0') + ':' + String(seconds % 60).padStart(2, '0');
+  $('timer').textContent = view.suddenDeath ? 'SÚBITA' : String(Math.floor(seconds / 60)).padStart(2, '0') + ':' + String(seconds % 60).padStart(2, '0');
   $('timer').classList.toggle('danger-timer', seconds <= 30);
-  const human = view.players[0];
-  $('bomb-stat').textContent = human.capacity; $('range-stat').textContent = human.range; $('speed-stat').textContent = human.speed;
+  const human = view.players.find(player => player.id === 'human');
+  $('bomb-stat').textContent = human?.capacity ?? '—'; $('range-stat').textContent = human?.range ?? '—'; $('speed-stat').textContent = human?.speed ?? '—';
+  if (mode === 'story' && !story.spectating && story.eliminatedFirst(view)) { failStory(); return; }
   if (view.status === 'finished') finish(view);
 }
 
