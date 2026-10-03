@@ -12,6 +12,14 @@ npm start
 
 Abra http://localhost:4173 no navegador. Não é necessário instalar pacotes.
 
+## Publicar no GitHub Pages
+
+O jogo funciona como site estático, inclusive dentro do caminho de um repositório. `npm run build` gera `dist/` com HTML, CSS, módulos e assets; o servidor de desenvolvimento, testes e documentos ficam fora do pacote.
+
+No repositório GitHub, selecione **Settings → Pages → Source → GitHub Actions**. O workflow `.github/workflows/pages.yml` verifica a sintaxe, executa os testes e publica o jogo a cada push em `main`. Também pode ser iniciado manualmente na aba Actions. Para usar GitHub Pages com GitHub Free, o repositório precisa ser público.
+
+O endereço de um repositório chamado `BomberPoliticos` na conta `fplevi` será `https://fplevi.github.io/BomberPoliticos/` após a publicação. O progresso do Modo história é salvo no navegador e no endereço utilizado; o progresso de localhost não é transferido para o site publicado.
+
 ## Controles
 
 Na tela de Início, escolha **Jogo rápido** ou **Modo história**; Enter inicia a seleção do Jogo rápido. Na seleção, clique em um personagem ou use as setas; confirme com **Jogar com personagem** ou Enter. Escape volta ao Início. Durante o Jogo rápido, **Personagens** retorna à seleção. No Modo história, **Sair** volta ao Início e mantém o progresso salvo neste navegador.
