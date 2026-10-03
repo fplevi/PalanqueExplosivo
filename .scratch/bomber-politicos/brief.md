@@ -1,6 +1,6 @@
 # Bomber Políticos — brief
 
-Status: ready-for-agent
+Status: completed
 
 ## Pedido do usuário
 

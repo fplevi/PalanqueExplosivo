@@ -1,6 +1,6 @@
 # Bomber Políticos — primeira versão
 
-Status: ready-for-agent
+Status: completed
 
 ## Autorização e escopo
 

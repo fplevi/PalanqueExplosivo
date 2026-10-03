@@ -1,6 +1,7 @@
 export const DIRECTIONS = [[0, -1], [1, 0], [0, 1], [-1, 0]];
 export const ARENA_WIDTH = 15;
 export const ARENA_HEIGHT = 13;
+const FLAME_DURATION = 0.55;
 
 export function seededRandom(seed) {
   let state = seed >>> 0;
@@ -137,8 +138,8 @@ export class Match {
       this.events.push({ type: 'explosion', x: bomb.x, y: bomb.y });
       for (const cell of this.blastCells(bomb, arenaAtDetonation)) {
         const flame = this.flames.find(other => other.x === cell.x && other.y === cell.y);
-        if (flame) flame.life = 0.55;
-        else this.flames.push({ ...cell, life: 0.55 });
+        if (flame) flame.life = FLAME_DURATION;
+        else this.flames.push({ ...cell, life: FLAME_DURATION });
         this.items = this.items.filter(item => item.x !== cell.x || item.y !== cell.y);
         if (arenaAtDetonation[cell.y][cell.x] === 'block') destroyed.set(`${cell.x},${cell.y}`, cell);
         for (const other of this.bombs) {
@@ -151,7 +152,7 @@ export class Match {
       this.arena[cell.y][cell.x] = 'floor';
       if (this.random() < 0.45) {
         const type = ['bomb', 'range', 'speed'][Math.floor(this.random() * 3)];
-        this.items.push({ ...cell, type, revealAt: this.elapsed + 0.55 });
+        this.items.push({ ...cell, type, revealAt: this.elapsed + FLAME_DURATION });
       }
     }
   }
@@ -178,7 +179,7 @@ export class Match {
     for (const flame of this.flames) add(flame.x, flame.y, 0, flame.life);
     for (const bomb of bombs) {
       const start = timings.get(bomb.id);
-      for (const cell of cells.get(bomb.id)) add(cell.x, cell.y, start, start + 0.55);
+      for (const cell of cells.get(bomb.id)) add(cell.x, cell.y, start, start + FLAME_DURATION);
     }
     return hazards;
   }

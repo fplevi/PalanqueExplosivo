@@ -157,10 +157,11 @@ function start() {
 function togglePause() {
   if (phase !== 'playing') return;
   match.pause(); pressed.clear();
-  const paused = match.snapshot().status === 'paused';
+  const view = match.snapshot();
+  const paused = view.status === 'paused';
   $('pause-button').textContent = paused ? '▶' : 'Ⅱ';
   $('pause-button').setAttribute('aria-label', paused ? 'Continuar partida' : 'Pausar partida');
-  $('match-state').textContent = paused ? 'PARTIDA PAUSADA' : 'PARTIDA EM ANDAMENTO';
+  $('match-state').textContent = paused ? 'PARTIDA PAUSADA' : view.players[0].alive ? 'PARTIDA EM ANDAMENTO' : 'MODO ESPECTADOR';
   if (paused) overlay('PAUSA', 'Respira. A arena espera por você.', 'CONTINUAR');
   else { $('arena-overlay').hidden = true; arena.focus({ preventScroll: true }); }
   announce(paused ? 'Partida pausada.' : 'Partida retomada.');
@@ -220,7 +221,7 @@ function frame(now) {
   const dt = Math.min((now - previousTime) / 1000, 0.05);
   previousTime = now;
   const time = now / 1000;
-  if (phase === 'countdown') {
+  if (phase === 'countdown' && !dialog.open) {
     countdown -= dt;
     const number = Math.max(1, Math.ceil(countdown));
     if (number !== countdownNumber) { countdownNumber = number; overlay(String(number), 'Escolha um caminho. Solte a bomba. Fuja.'); tone(440, 0.07); }
