@@ -14,7 +14,6 @@
   <div class="console-shell">
     <header class="topbar">
       <button id="home-button" class="wordmark" aria-label="Bomber Políticos, voltar ao início"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 9h8v2h3v8h-3v3H7v-3H4v-8h4z"/><path d="M13 9V4h6V1h3v6h-6v2z"/></svg><span>Bomber Políticos</span></button>
-      <nav aria-label="Etapas do jogo"><ol class="screen-progress"><li data-step="home" aria-current="step"><span>1</span>Início</li><li data-step="selection"><span>2</span>Personagens</li><li data-step="game"><span>3</span>Partida</li></ol></nav>
       <div class="utilities"><button id="sound-button" class="utility-button" aria-label="Ativar som" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path id="sound-mark" d="m16 9 5 6m0-6-5 6"/></svg></button><button id="help-button" class="utility-button" aria-label="Como jogar">?</button></div>
     </header>
 
@@ -22,8 +21,7 @@
       <section id="home-screen" class="screen home-screen" data-screen="home" aria-labelledby="home-title">
         <div class="title-lockup"><h1 id="home-title" tabindex="-1">Bomber<br>Políticos</h1><span class="title-edition">Edição Brasil 2026</span></div>
         <canvas id="title-scene" width="640" height="224" aria-label="Cena em pixel art com personagens na arena e um horizonte inspirado em Brasília"></canvas>
-        <div class="home-menu"><p>Escolha sua disputa.<br>Seja o último de pé.</p><button id="begin-button" class="arcade-button primary-button"><span class="pixel-cursor" aria-hidden="true"></span>Jogo rápido</button><button id="story-button" class="arcade-button story-button">Modo história</button><button id="resume-story" class="text-button" hidden>Retomar história</button><p id="save-notice" class="save-notice" hidden></p><button id="home-help" class="text-button">Como jogar</button></div>
-        <div class="home-footnote"><span>Jogo rápido: 1 contra 3 bots</span><span>História: 11 fases</span></div>
+        <div class="home-menu"><p>Escolha sua disputa.<br>Seja o último de pé.</p><button id="story-button" class="arcade-button primary-button"><span class="pixel-cursor" aria-hidden="true"></span>Modo história</button><button id="begin-button" class="arcade-button story-button">Jogo rápido</button><button id="resume-story" class="text-button" hidden>Retomar história</button><p id="save-notice" class="save-notice" hidden></p></div>
       </section>
 
       <section id="selection-screen" class="screen selection-screen" data-screen="selection" aria-labelledby="selection-title" hidden>
@@ -42,7 +40,6 @@
         <div class="key-legend"><span><kbd>WASD</kbd> ou <kbd>↑←↓→</kbd> mover</span><span><kbd>Espaço</kbd> bomba</span><span><kbd>P</kbd> / <kbd>Esc</kbd> pausa</span></div>
       </section>
     </main>
-    <footer class="console-footer"><span>Bomber Políticos</span><span id="screen-footer-hint">Pressione Enter para começar</span><span>Um jogo de humor</span></footer>
   </div>
   <div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
   <dialog id="help-dialog"><button id="close-help" class="dialog-close" aria-label="Fechar instruções">×</button><h2>Como jogar</h2><div class="manual-controls"><span><kbd>WASD</kbd> ou <kbd>↑←↓→</kbd> mover</span><span><kbd>Espaço</kbd> bomba</span><span><kbd>P</kbd> / <kbd>Esc</kbd> pausa</span></div><p>Coloque uma bomba e saia de perto. Ela explode em <strong>dois segundos</strong>, inclusive em você.</p><p>A explosão segue em cruz, para nas paredes e destrói o primeiro bloco do caminho. Outras bombas atingidas explodem em cadeia.</p><div class="manual-items"><span><i class="pixel-bomb"></i> Mais bombas</span><span><i class="pixel-flame"></i> Mais alcance</span><span><i class="pixel-boot"></i> Mais velocidade</span></div><p>O último sobrevivente vence. Após <strong>2 minutos e 30 segundos</strong>, começa a morte súbita: blocos indestrutíveis caem em espiral e fecham a arena. Fuja da célula sinalizada; a proteção não evita esmagamento.</p><p>No Jogo rápido, cada participante tem uma vida. No Modo história, todos têm três vidas por fase. Tentar novamente reinicia a fase do zero. Na penúltima fase, os dois melhores avançam ao segundo turno; quem terminar em terceiro pode assistir às duas disputas finais. O progresso é salvo neste navegador; ao retomar, a fase começa do zero.</p><button id="help-ok" class="arcade-button primary-button">Entendi</button></dialog>

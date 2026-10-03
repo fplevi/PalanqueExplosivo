@@ -104,12 +104,6 @@ function showScreen(target, { record = true, replace = false, focus = true } = {
   if (target === 'home') refreshSave();
   document.body.dataset.screen = target;
   for (const section of document.querySelectorAll('main > [data-screen]')) section.hidden = section.dataset.screen !== target;
-  for (const step of document.querySelectorAll('[data-step]')) {
-    if (step.dataset.step === target) step.setAttribute('aria-current', 'step');
-    else step.removeAttribute('aria-current');
-  }
-  const hints = { home: 'Pressione Enter para começar', selection: 'Escolha e confirme seu personagem', game: 'A sua bomba também pega você' };
-  $('screen-footer-hint').textContent = hints[target];
   const hash = '#' + routes[target];
   if (record || guarded) {
     const method = replace || guarded ? 'replaceState' : 'pushState';
@@ -345,7 +339,6 @@ $('overlay-button').addEventListener('click', () => primaryAction ? primaryActio
 $('overlay-secondary').addEventListener('click', () => secondaryAction?.());
 $('overlay-watch').addEventListener('click', () => watchAction?.());
 $('help-button').addEventListener('click', openHelp);
-$('home-help').addEventListener('click', openHelp);
 $('close-help').addEventListener('click', () => dialog.close());
 $('help-ok').addEventListener('click', () => dialog.close());
 dialog.addEventListener('close', () => {
