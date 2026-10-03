@@ -64,7 +64,22 @@ export function drawCharacter(ctx, character, x, y, scale = 1, facing = 2, step 
       rect(glassesColor, 9, 6, 1, 2); rect(glassesColor, 12, 6, 1, 2);
       rect(glassesColor, 7, 6, 2, 1);
     }
-    if (character.beard) {
+    if (character.beard && character.beardStyle === 'stubble') {
+      ctx.save();
+      ctx.globalAlpha *= 0.2;
+      for (const bx of [4, 6, 9, 11]) rect(character.beard, bx, 9, 1, 1);
+      ctx.restore();
+      ctx.save();
+      ctx.globalAlpha *= 0.32;
+      for (const bx of [4, 11]) rect(character.beard, bx, 10, 1, 1);
+      for (const bx of [4, 6, 8, 10]) rect(character.beard, bx, 11, 1, 1);
+      ctx.restore();
+      ctx.save();
+      ctx.globalAlpha *= 0.44;
+      for (const bx of [5, 7, 9, 10]) rect(character.beard, bx, 12, 1, 1);
+      ctx.restore();
+      rect('#9b654e', 6, 10, 4, 1);
+    } else if (character.beard) {
       rect(character.beard, 4, 9, 8, 3);
       rect(character.beard, 5, 12, 6, 1);
       rect('#715542', 7, 10, 3, 1);
@@ -131,7 +146,13 @@ export function renderArena(ctx, view, time, { lobby = false } = {}) {
       const px = x * TILE;
       const py = y * TILE;
       const cell = view.arena[y][x];
-      if (cell === 'wall') drawWall(ctx, px, py, x === 0 || y === 0 || x === 14 || y === 12);
+      if (cell === 'wall' || cell === 'crushed') {
+        drawWall(ctx, px, py, x === 0 || y === 0 || x === 14 || y === 12);
+        if (cell === 'crushed') {
+          ctx.fillStyle = '#f57962'; ctx.fillRect(px + 5, py + 5, 22, 3);
+          ctx.fillStyle = '#353b52'; ctx.fillRect(px + 13, py + 10, 6, 16);
+        }
+      }
       else {
         ctx.fillStyle = (x + y) % 2 ? '#398a56' : '#358452'; ctx.fillRect(px, py, TILE, TILE);
         ctx.fillStyle = '#2d774b'; ctx.fillRect(px, py + 30, TILE, 2);
@@ -141,6 +162,13 @@ export function renderArena(ctx, view, time, { lobby = false } = {}) {
         if (cell === 'block') drawBlock(ctx, px, py);
       }
     }
+  }
+  if (view.nextBlock) {
+    const { x, y } = view.nextBlock;
+    ctx.fillStyle = Math.floor(time * 8) % 2 ? '#f5796280' : '#f6c46c60';
+    ctx.fillRect(x * TILE + 2, y * TILE + 2, TILE - 4, TILE - 4);
+    ctx.strokeStyle = '#ffdcc0'; ctx.lineWidth = 2;
+    ctx.strokeRect(x * TILE + 3, y * TILE + 3, TILE - 6, TILE - 6);
   }
   for (const item of view.items) if ((item.revealAt ?? 0) <= view.elapsed) drawItem(ctx, item, time);
   for (const bomb of view.bombs) {
@@ -168,7 +196,7 @@ export function renderArena(ctx, view, time, { lobby = false } = {}) {
     ctx.fillStyle = '#fff6cd'; ctx.fillRect(x + 12, y + 12, 8, 8);
   }
   for (const player of [...view.players].sort((a, b) => a.y - b.y)) {
-    if (!player.alive) continue;
+    if (!player.alive || player.respawning || (player.invulnerable > 0 && Math.floor(time * 10) % 2)) continue;
     const progress = 1 - player.cooldown / player.moveDuration;
     const x = player.fromX + (player.x - player.fromX) * progress;
     const y = player.fromY + (player.y - player.fromY) * progress;
