@@ -18,7 +18,7 @@ O jogo funciona como site estático, inclusive dentro do caminho de um repositó
 
 No repositório GitHub, selecione **Settings → Pages → Source → GitHub Actions**. O workflow `.github/workflows/pages.yml` verifica a sintaxe, executa os testes e publica o jogo a cada push em `main`. Também pode ser iniciado manualmente na aba Actions. Para usar GitHub Pages com GitHub Free, o repositório precisa ser público.
 
-O endereço de um repositório chamado `BomberPoliticos` na conta `fplevi` será `https://fplevi.github.io/BomberPoliticos/` após a publicação. O progresso do Modo história é salvo no navegador e no endereço utilizado; o progresso de localhost não é transferido para o site publicado.
+Jogue em [Palanque Explosivo](https://fplevi.github.io/PalanqueExplosivo/). O repositório público é [fplevi/PalanqueExplosivo](https://github.com/fplevi/PalanqueExplosivo). O progresso do Modo história é salvo no navegador e no endereço utilizado; o progresso de localhost não é transferido para o site publicado.
 
 ## Controles
 

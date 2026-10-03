@@ -1,6 +1,6 @@
 # Publicação gratuita no GitHub Pages
 
-Status: ready-for-agent
+Status: resolved
 
 ## Pedido
 
@@ -15,10 +15,10 @@ Publicar o jogo no GitHub Pages para os jogadores acessarem diretamente pelo nav
 - Validar o artefato em um caminho com subdiretório, incluindo fontes, seleção e partida.
 - Publicar uma instalação nova, sem exportar ou incluir o save pessoal. O progresso permanece somente no armazenamento do navegador de cada jogador.
 
-## Destino proposto
+## Destino publicado
 
-Conta verificada: `fplevi`. Repositório ainda inexistente: `fplevi/BomberPoliticos`.
-GitHub Pages gratuito exige repositório público. Publicação externa depende da confirmação da visibilidade e deste destino.
+Conta verificada: `fplevi`. Repositório público: `fplevi/PalanqueExplosivo`, conforme a correção de nome solicitada pelo usuário.
+Jogo disponível em `https://fplevi.github.io/PalanqueExplosivo/`.
 
 ## Verificação
 
@@ -35,3 +35,11 @@ O usuário pediu para aguardar correções nos sprites antes de publicar. Nenhum
 ## Progresso pessoal
 
 Conferido: o save é lido e escrito em `localStorage` por `src/main.js`; não existe arquivo de save exportado no pacote `dist/`. O build copia arquivos do projeto e não acessa dados do navegador. O endereço do GitHub Pages terá um armazenamento separado de localhost, portanto o save local não acompanha a publicação. Manter o save local intacto e a função de salvar disponível para cada jogador. A publicação continua aguardando as correções dos sprites.
+
+## Publicação final
+
+Em 2026-10-03, o commit `eb23223` passou na verificação de sintaxe, nos 45 testes, no build e em `git diff --check`. Conferidos os sprites corrigidos e a remoção do indicador de tamanho do placar no navegador.
+
+O repositório foi publicado e renomeado para `PalanqueExplosivo` a pedido do usuário; o remoto local foi atualizado. Pages está configurado com GitHub Actions e HTTPS. A execução `37140509240` terminou com sucesso no endereço definitivo.
+
+A página pública carregou fontes, CSS e módulos dentro de `/PalanqueExplosivo/` e abriu sem progresso predefinido. O botão Retomar estava oculto. Evidência visual em `published.jpg`. Nenhum save do navegador foi exportado.
