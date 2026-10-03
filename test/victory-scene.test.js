@@ -26,7 +26,7 @@ test('the campaign winner arrives, throws a bomb, eliminates both bosses, then s
   assert.equal(scene.phase, 'complete');
   assert.equal(scene.pairVisible, false);
   assert.equal(scene.winnerX, 320);
-  assert.equal(scene.message, 'Quem diria? Você acabou com o ciclo de amor e ódio');
+  assert.equal(scene.message, 'Quem diria? Você acabou com o ciclo do poder');
   animation.update(100);
   assert.deepEqual(animation.snapshot(), scene, 'A cena termina sem reiniciar ou explodir o vencedor');
 });

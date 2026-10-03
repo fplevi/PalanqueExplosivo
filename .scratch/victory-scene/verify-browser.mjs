@@ -23,7 +23,7 @@ await page.evaluate(()=>window.__completeCampaign());
 assert.equal(await page.locator('body').getAttribute('data-screen'),'victory');
 await page.screenshot({path:'.scratch/victory-scene/arrival.png',fullPage:true});
 await page.locator('#victory-message').waitFor({state:'visible',timeout:12000});
-assert.equal(await page.locator('#victory-message').textContent(),'Quem diria? Você acabou com o ciclo de amor e ódio');
+assert.equal(await page.locator('#victory-message').textContent(),'Quem diria? Você acabou com o ciclo do poder');
 assert.equal(await page.locator('#victory-winner').textContent(),'Clariana Barão venceu');
 await page.screenshot({path:'.scratch/victory-scene/complete.png',fullPage:true});
 await page.locator('#victory-exit').click();

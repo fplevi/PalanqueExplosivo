@@ -2,7 +2,7 @@ import { characterFor } from './characters.js';
 import { drawCharacter, drawBomb } from './art.js';
 import { drawTitleBackdrop } from './title-art.js';
 
-export const VICTORY_MESSAGE = 'Quem diria? Você acabou com o ciclo de amor e ódio';
+export const VICTORY_MESSAGE = 'Quem diria? Você acabou com o ciclo do poder';
 
 export class VictoryAnimation {
   constructor(winner) {

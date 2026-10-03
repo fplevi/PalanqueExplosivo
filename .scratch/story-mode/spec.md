@@ -12,7 +12,7 @@ Especificação aprovada pelo usuário em 2026-10-03. Implementada.
 - Se o jogador eliminar Flávio e depois Lula, enfrenta Lula no Segundo turno; na ordem inversa, enfrenta Flávio.
 - O jogador tem três vidas por fase e reaparece na mesma arena com proteção breve. Cada computador tem uma vida até a penúltima fase, inclusive Lula e Flávio. No Segundo turno, ambos os finalistas têm três vidas, inclusive numa final entre computadores. A eliminação ocorre ao esgotar as vidas.
 - Eliminações simultâneas que deixem uma vaga indefinida levam a desempate entre os empatados, cada um com uma vida.
-- Game Over exibe exatamente: "Você falhou em acabar com o ciclo de amor e ódio".
+- Game Over exibe exatamente: "Você falhou em acabar com o ciclo do poder".
 - Na penúltima fase, Game Over oferece Tentar novamente, Assistir e Sair.
 - Nas demais fases, Game Over oferece apenas Tentar novamente e Sair.
 - Tentar novamente reinicia a fase inteira do zero, numa nova arena, com as vidas originais da fase (jogador: três; computadores: uma antes da final, três na final), sem bombas, melhorias adquiridas ou eliminações anteriores. Se a derrota ocorrer em desempate, reinicia a fase original com todos os participantes.
