@@ -1,0 +1,177 @@
+import { characterFor } from './characters.js';
+
+export const TILE = 32;
+
+export function drawCharacter(ctx, character, x, y, scale = 1, facing = 2, step = 0) {
+  ctx.save();
+  ctx.translate(Math.round(x), Math.round(y));
+  ctx.scale(scale, scale);
+  const rect = (color, rx, ry, width, height) => { ctx.fillStyle = color; ctx.fillRect(rx, ry, width, height); };
+  const dark = '#192c30';
+  const walk = step % 2;
+  rect('rgba(9,34,23,0.26)', 1, 23, 14, 3);
+  rect(dark, 3, 12, 10, 10);
+  rect(character.suit, 4, 13, 8, 8);
+  rect(character.suit, 1, 14 + walk, 3, 6);
+  rect(character.suit, 12, 15 - walk, 3, 6);
+  rect(character.skin, 1, 19 + walk, 3, 2);
+  rect(character.skin, 12, 20 - walk, 3, 2);
+  rect('#e7e3ce', 6, 13, 4, 5);
+  rect(character.color, 7, 14, 2, 6);
+  rect(dark, 4, 21, 3, 3 + walk);
+  rect(dark, 9, 21, 3, 4 - walk);
+  rect('#151f27', 3, 24 + walk, 5, 2);
+  rect('#151f27', 9, 25 - walk, 5, 2);
+  if (character.style === 'long') rect(character.hair, 2, 3, 12, 12);
+  rect(dark, 3, 1, 10, 12);
+  rect(dark, 2, 3, 12, 7);
+  rect(character.skin, 3, 3, 10, 8);
+  rect(character.skin, 5, 11, 6, 2);
+  rect(character.hair, 3, 1, 10, 4);
+  rect(character.hair, 2, 4, 2, 4);
+  rect(character.hair, 12, 4, 2, 4);
+  rect(character.hair, 4, 0, 7, 2);
+  if (character.style === 'side') {
+    rect(character.hair, 9, 3, 4, 3);
+    rect('#ffffff28', 4, 2, 5, 1);
+  }
+  if (facing === 0) {
+    rect(character.hair, 3, 3, 10, 8);
+    rect('#00000015', 4, 9, 8, 2);
+    rect(character.suit, 5, 13, 6, 7);
+  } else {
+    if (facing === 1) {
+      rect(dark, 10, 6, 2, 2);
+      rect(character.skin, 13, 7, 2, 2);
+    } else if (facing === 3) {
+      rect(dark, 4, 6, 2, 2);
+      rect(character.skin, 1, 7, 2, 2);
+    } else {
+      rect(dark, 4, 6, 2, 2);
+      rect(dark, 10, 6, 2, 2);
+      rect('#f4cc9b', 7, 8, 2, 2);
+    }
+    if (character.glasses) {
+      rect('#304246', 3, 5, 4, 1); rect('#304246', 9, 5, 4, 1);
+      rect('#304246', 3, 8, 4, 1); rect('#304246', 9, 8, 4, 1);
+      rect('#304246', 3, 6, 1, 2); rect('#304246', 6, 6, 1, 2);
+      rect('#304246', 9, 6, 1, 2); rect('#304246', 12, 6, 1, 2);
+      rect('#304246', 7, 6, 2, 1);
+    }
+    if (character.beard) {
+      rect(character.beard, 4, 9, 8, 3);
+      rect(character.beard, 5, 12, 6, 1);
+      rect('#715542', 7, 10, 3, 1);
+    } else rect('#9b654e', 6, 10, 4, 1);
+  }
+  ctx.restore();
+}
+
+export function drawBomb(ctx, x, y, time = 0, scale = 1) {
+  ctx.save(); ctx.translate(Math.round(x), Math.round(y)); ctx.scale(scale, scale);
+  const r = (color, rx, ry, w, h) => { ctx.fillStyle = color; ctx.fillRect(rx, ry, w, h); };
+  r('#0c2023', 4, 8, 15, 13); r('#0c2023', 7, 5, 9, 18);
+  r('#30454a', 6, 9, 11, 10); r('#53676a', 7, 8, 6, 4);
+  r('#a9bec2', 7, 9, 3, 3); r('#182e33', 14, 12, 3, 7);
+  r('#172c31', 10, 3, 6, 3); r('#e6be68', 14, 0, 2, 4);
+  r(Math.floor(time * 12) % 2 ? '#ffd97b' : '#ee774d', 16, -2, 3, 3);
+  ctx.restore();
+}
+
+function drawWall(ctx, x, y, border) {
+  ctx.fillStyle = '#354d54'; ctx.fillRect(x, y, 32, 32);
+  ctx.fillStyle = border ? '#81999b' : '#98abaa'; ctx.fillRect(x + 1, y + 1, 29, 27);
+  ctx.fillStyle = '#c5d2c6'; ctx.fillRect(x + 1, y + 1, 29, 3); ctx.fillRect(x + 1, y + 4, 3, 23);
+  ctx.fillStyle = '#657e85'; ctx.fillRect(x + 27, y + 5, 3, 23); ctx.fillRect(x + 4, y + 25, 26, 4);
+  ctx.fillStyle = '#a9bcb7'; ctx.fillRect(x + 7, y + 7, 15, 14);
+  ctx.fillStyle = '#738d90'; ctx.fillRect(x + 29, y + 29, 3, 3);
+}
+
+function drawBlock(ctx, x, y) {
+  ctx.fillStyle = '#733f36'; ctx.fillRect(x + 1, y + 1, 30, 30);
+  ctx.fillStyle = '#d39764'; ctx.fillRect(x + 2, y + 2, 28, 27);
+  for (let row = 0; row < 3; row++) {
+    const top = y + 3 + row * 9;
+    ctx.fillStyle = '#ebbb82'; ctx.fillRect(x + 3, top, 26, 2);
+    ctx.fillStyle = '#b87350'; ctx.fillRect(x + 3, top + 7, 26, 2);
+    const seam = x + (row % 2 ? 10 : 20);
+    ctx.fillStyle = '#81483a'; ctx.fillRect(seam, top, 2, 9);
+  }
+  ctx.fillStyle = '#864d3b'; ctx.fillRect(x + 29, y + 3, 2, 28);
+}
+
+function drawItem(ctx, item, time) {
+  const x = item.x * TILE + 6;
+  const y = item.y * TILE + 6 + Math.round(Math.sin(time * 4) * 1);
+  ctx.fillStyle = '#244535'; ctx.fillRect(x - 1, y - 1, 22, 22);
+  ctx.fillStyle = { bomb: '#80cad0', range: '#ffc768', speed: '#c2aadf' }[item.type];
+  ctx.fillRect(x, y, 20, 20);
+  ctx.fillStyle = '#fffae1'; ctx.fillRect(x + 2, y + 2, 16, 2);
+  if (item.type === 'bomb') drawBomb(ctx, x + 3, y + 5, time, 0.6);
+  else if (item.type === 'range') {
+    ctx.fillStyle = '#e86338'; ctx.fillRect(x + 8, y + 5, 6, 11); ctx.fillRect(x + 5, y + 9, 12, 6);
+    ctx.fillStyle = '#fff0a6'; ctx.fillRect(x + 9, y + 9, 4, 7);
+  } else {
+    ctx.fillStyle = '#4b4770'; ctx.fillRect(x + 8, y + 5, 6, 8); ctx.fillRect(x + 4, y + 12, 12, 4);
+    ctx.fillStyle = '#f3e7d5'; ctx.fillRect(x + 3, y + 16, 14, 2);
+  }
+}
+
+export function renderArena(ctx, view, time, { lobby = false } = {}) {
+  ctx.imageSmoothingEnabled = false;
+  ctx.fillStyle = '#2b7350'; ctx.fillRect(0, 0, 480, 416);
+  for (let y = 0; y < view.arena.length; y++) {
+    for (let x = 0; x < view.arena[y].length; x++) {
+      const px = x * TILE;
+      const py = y * TILE;
+      const cell = view.arena[y][x];
+      if (cell === 'wall') drawWall(ctx, px, py, x === 0 || y === 0 || x === 14 || y === 12);
+      else {
+        ctx.fillStyle = (x + y) % 2 ? '#398a56' : '#358452'; ctx.fillRect(px, py, TILE, TILE);
+        ctx.fillStyle = '#2d774b'; ctx.fillRect(px, py + 30, TILE, 2);
+        if ((x * 7 + y * 3) % 5 === 0) {
+          ctx.fillStyle = '#47945e'; ctx.fillRect(px + 5, py + 9, 2, 3); ctx.fillRect(px + 8, py + 10, 2, 2);
+        }
+        if (cell === 'block') drawBlock(ctx, px, py);
+      }
+    }
+  }
+  for (const item of view.items) if ((item.revealAt ?? 0) <= view.elapsed) drawItem(ctx, item, time);
+  for (const bomb of view.bombs) {
+    const pulse = bomb.fuse < 0.65 && Math.floor(time * 14) % 2;
+    drawBomb(ctx, bomb.x * TILE + 5, bomb.y * TILE + 5 - Number(pulse), time);
+  }
+  for (const flame of view.flames) {
+    const x = flame.x * TILE; const y = flame.y * TILE;
+    const jitter = Math.floor(time * 16 + x) % 3;
+    const horizontal = view.flames.some(other => other.y === flame.y && Math.abs(other.x - flame.x) === 1);
+    const vertical = view.flames.some(other => other.x === flame.x && Math.abs(other.y - flame.y) === 1);
+    if (horizontal) {
+      ctx.fillStyle = '#e6612d'; ctx.fillRect(x, y + 6, 32, 20);
+      ctx.fillStyle = '#ffad3b'; ctx.fillRect(x, y + 9, 32, 14);
+      ctx.fillStyle = '#ffe47b'; ctx.fillRect(x, y + 12, 32, 8);
+    }
+    if (vertical) {
+      ctx.fillStyle = '#e6612d'; ctx.fillRect(x + 6, y, 20, 32);
+      ctx.fillStyle = '#ffad3b'; ctx.fillRect(x + 9, y, 14, 32);
+      ctx.fillStyle = '#ffe47b'; ctx.fillRect(x + 12, y, 8, 32);
+    }
+    ctx.fillStyle = '#e6612d'; ctx.fillRect(x + 2, y + 5, 28, 23); ctx.fillRect(x + 5, y + 2, 23, 28);
+    ctx.fillStyle = '#ffad3b'; ctx.fillRect(x + 4, y + 8, 24, 16); ctx.fillRect(x + 8, y + 4, 16, 24);
+    ctx.fillStyle = '#ffe47b'; ctx.fillRect(x + 7 + jitter, y + 11, 18 - jitter * 2, 10); ctx.fillRect(x + 11, y + 7 + jitter, 10, 18 - jitter * 2);
+    ctx.fillStyle = '#fff6cd'; ctx.fillRect(x + 12, y + 12, 8, 8);
+  }
+  for (const player of [...view.players].sort((a, b) => a.y - b.y)) {
+    if (!player.alive) continue;
+    const progress = 1 - player.cooldown / player.moveDuration;
+    const x = player.fromX + (player.x - player.fromX) * progress;
+    const y = player.fromY + (player.y - player.fromY) * progress;
+    const character = characterFor(player.character);
+    const px = x * TILE + 8; const py = y * TILE + 3;
+    ctx.fillStyle = character.color; ctx.fillRect(Math.round(px) + 2, Math.round(py) + 29, 12, 2);
+    drawCharacter(ctx, character, px, py, 1, player.facing, player.cooldown > 0 ? Math.floor(time * 10) : 0);
+    if (player.id === 'human' && !lobby) {
+      ctx.fillStyle = '#ffe198'; ctx.fillRect(Math.round(px) + 6, Math.round(py) - 5, 5, 2); ctx.fillRect(Math.round(px) + 7, Math.round(py) - 3, 3, 2);
+    }
+  }
+}
