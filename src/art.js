@@ -243,7 +243,13 @@ export function renderArena(ctx, view, time, { lobby = false } = {}) {
     const y = player.fromY + (player.y - player.fromY) * progress;
     const character = characterFor(player.character);
     const px = x * TILE + 8; const py = y * TILE + 3;
-    ctx.fillStyle = character.color; ctx.fillRect(Math.round(px) + 2, Math.round(py) + 29, 12, 2);
+    const lives = Math.max(0, Math.min(3, player.lives ?? 1));
+    const barX = Math.round(px) + 3;
+    const barY = Math.round(py) + 29;
+    for (let i = 0; i < 3; i++) {
+      ctx.fillStyle = i < lives ? character.color : darken(character.color, 0.28);
+      ctx.fillRect(barX + i * 4, barY, 3, 2);
+    }
     drawCharacter(ctx, character, px, py, 1, player.facing, player.cooldown > 0 ? Math.floor(time * 10) : 0);
     if (player.id === 'human' && !lobby) {
       ctx.fillStyle = '#ffe198'; ctx.fillRect(Math.round(px) + 6, Math.round(py) - 5, 5, 2); ctx.fillRect(Math.round(px) + 7, Math.round(py) - 3, 3, 2);
