@@ -1,5 +1,5 @@
 {
-  "name": "bomber-politicos",
+  "name": "palanque-explosivo",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -7,7 +7,7 @@
     "start": "node server.mjs",
     "build": "node scripts/build.mjs",
     "test": "node --test",
-    "check": "node --check src/engine.js && node --check src/story.js && node --check src/art.js && node --check src/title-animation.js && node --check src/title-art.js && node --check src/main.js && node --check server.mjs && node --check scripts/build.mjs"
+    "check": "node --check src/engine.js && node --check src/story.js && node --check src/art.js && node --check src/title-animation.js && node --check src/victory-scene.js && node --check src/title-art.js && node --check src/main.js && node --check server.mjs && node --check scripts/build.mjs"
   },
   "engines": { "node": ">=20" }
 }

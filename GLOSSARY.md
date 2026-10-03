@@ -1,4 +1,4 @@
-# Bomber Políticos
+# Palanque Explosivo
 
 Vocabulário do jogo de arena com bombas e personagens inspirados em políticos brasileiros.
 

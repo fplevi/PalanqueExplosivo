@@ -1,4 +1,4 @@
-# Bomber Políticos — primeira versão
+# Palanque Explosivo — primeira versão
 
 Status: completed
 

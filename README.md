@@ -1,6 +1,6 @@
-# Bomber Políticos
+# Palanque Explosivo
 
-Jogo de arena 2D em pixel art para navegador no computador. Escolha entre **Jogo rápido**, com um jogador contra três computadores, e **Modo história**, com 11 fases inspiradas em disputas eleitorais. Os personagens começam com os mesmos atributos.
+Jogo de arena 2D em pixel art para navegador no computador. Escolha entre **Jogo rápido**, com um jogador contra três computadores, e **Modo história**, com 5 fases inspiradas em disputas eleitorais. Os personagens começam com os mesmos atributos.
 
 ## Executar
 
@@ -38,13 +38,13 @@ O último sobrevivente vence. Após dois minutos e meio, começa a **Morte súbi
 
 ## Modo história
 
-Escolha qualquer personagem, exceto Lula e Flávio Bolsonaro, e enfrente os nove demais em duelos sorteados. A dificuldade dos computadores aumenta ao longo da campanha. Todos têm três vidas por fase, com reaparecimento e dois segundos de proteção após perder uma vida. A proteção não evita esmagamento.
+Escolha qualquer personagem, exceto Lula e Flávio Bolsonaro. As primeiras três fases reúnem um jogador contra três computadores, agrupando os nove adversários em ordem sorteada, sem repetições. A dificuldade dos computadores aumenta ao longo da campanha. O jogador tem três vidas por fase; os computadores têm uma vida até o Primeiro turno. No Segundo turno, ambos os finalistas têm três vidas. Ao perder uma vida, o personagem reaparece com dois segundos de proteção; a proteção não evita esmagamento.
 
-A fase 10, o **Primeiro turno**, reúne o jogador, Lula e Flávio. Os dois melhores colocados avançam à fase 11, o **Segundo turno**, com três vidas novas. Eliminar Flávio primeiro leva à final contra Lula; eliminar Lula primeiro leva à final contra Flávio. Terminar em segundo também classifica o jogador. Empates que indefinam uma vaga são resolvidos numa nova arena, com uma vida por participante.
+A fase 4, o **Primeiro turno**, reúne o jogador, Lula e Flávio. Os dois melhores colocados avançam à fase 5, o **Segundo turno**, com três vidas para cada finalista, inclusive quando são dois computadores. Eliminar Flávio primeiro leva à final contra Lula; eliminar Lula primeiro leva à final contra Flávio. Terminar em segundo também classifica o jogador. Empates que indefinam uma vaga são resolvidos numa nova arena, com uma vida por participante.
 
-Ao falhar, aparece **GAME OVER**, com a mensagem **Você falhou em acabar com o ciclo de amor e ódio**. **Tentar novamente** reinicia a fase inteira do zero com três vidas para todos; **Sair** volta ao início. Terminar em terceiro no Primeiro turno também oferece **Assistir**, para acompanhar o restante da disputa e, automaticamente, o Segundo turno entre os dois computadores.
+Ao falhar, aparece **GAME OVER**, com a mensagem **Você falhou em acabar com o ciclo de amor e ódio**. **Tentar novamente** reinicia a fase inteira do zero, com três vidas para o jogador e uma para cada computador nas fases anteriores à final; na final, ambos voltam a ter três vidas. **Sair** volta ao início. Nas primeiras três fases, a eliminação do jogador apresenta Game Over imediatamente, mesmo com computadores ainda vivos. Terminar em terceiro no Primeiro turno também oferece **Assistir**, para acompanhar o restante da disputa e, automaticamente, o Segundo turno entre os dois computadores.
 
-O progresso é salvo localmente: personagem, ordem dos adversários, fase e finalistas. **Retomar história** começa a fase atual do zero. Iniciar uma nova campanha substitui o progresso anterior. Se o navegador bloquear o armazenamento, a tela de início informa que o progresso só estará disponível enquanto o jogo permanecer aberto.
+O progresso é salvo localmente: personagem, ordem dos adversários, fase e finalistas. **Retomar história** começa a fase atual do zero. Campanhas anteriores de 11 fases são adaptadas à sequência de 5 fases, preservando personagem, ordem e finalistas; cada três duelos anteriores correspondem a uma fase nova. Iniciar uma nova campanha substitui o progresso anterior. Se o navegador bloquear o armazenamento, a tela de início informa que o progresso só estará disponível enquanto o jogo permanecer aberto.
 
 ## Desenvolvimento
 

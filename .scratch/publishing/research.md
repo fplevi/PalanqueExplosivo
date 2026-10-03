@@ -1,4 +1,4 @@
-# Publicação gratuita do Bomber Políticos
+# Publicação gratuita do Palanque Explosivo
 
 Pesquisa em fontes oficiais consultadas em 2026-10-03. Nenhuma conta acessada e nenhum conteúdo publicado.
 

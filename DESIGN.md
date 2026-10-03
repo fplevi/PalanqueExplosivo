@@ -1,4 +1,4 @@
-# Direção visual — Bomber Políticos
+# Direção visual — Palanque Explosivo
 
 ## Referência e intenção
 
@@ -28,7 +28,7 @@ Início: título central, ilustração própria da arena com personagens e uma a
 
 ```text
 marca              Início / Personagens / Partida       som / ajuda
-                          Bomber Políticos
+                          Palanque Explosivo
                      [cena em pixel art]
                          [Iniciar jogo]
 ```

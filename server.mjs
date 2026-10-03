@@ -20,4 +20,4 @@ http.createServer(async (request, response) => {
   } catch {
     response.writeHead(404); response.end('Não encontrado');
   }
-}).listen(port, '127.0.0.1', () => console.log(`Bomber Políticos: http://localhost:${port}`));
+}).listen(port, '127.0.0.1', () => console.log(`Palanque Explosivo: http://localhost:${port}`));

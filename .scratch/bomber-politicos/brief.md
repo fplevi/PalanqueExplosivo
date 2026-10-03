@@ -1,4 +1,4 @@
-# Bomber Políticos — brief
+# Palanque Explosivo — brief
 
 Status: completed
 

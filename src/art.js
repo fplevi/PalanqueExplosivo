@@ -2,7 +2,7 @@ import { characterFor } from './characters.js';
 
 export const TILE = 32;
 
-export function drawCharacter(ctx, character, x, y, scale = 1, facing = 2, step = 0) {
+export function drawCharacter(ctx, character, x, y, scale = 1, facing = 2, step = 0, raisedArm = 0) {
   ctx.save();
   ctx.translate(Math.round(x), Math.round(y));
   ctx.scale(scale, scale);
@@ -16,11 +16,21 @@ export function drawCharacter(ctx, character, x, y, scale = 1, facing = 2, step 
   rect('rgba(9,34,23,0.26)', 1, 23, 14, 3);
   rect(dark, 3, 12, 10, 10);
   rect(character.suit, 4, 13, 8, 8);
-  rect(character.suit, 1, 14 + walk, 3, 6);
-  rect(character.suit, 12, 15 - walk, 3, 6);
   const shortSleeves = character.outfit === 'tshirt';
-  rect(character.skin, 1, (shortSleeves ? 17 : 19) + walk, 3, shortSleeves ? 4 : 2);
-  rect(character.skin, 12, (shortSleeves ? 18 : 20) - walk, 3, shortSleeves ? 4 : 2);
+  if (raisedArm === -1) {
+    rect(character.suit, -2, 11, 6, 3);
+    rect(character.skin, -3, 6, 3, 6);
+  } else {
+    rect(character.suit, 1, 14 + walk, 3, 6);
+    rect(character.skin, 1, (shortSleeves ? 17 : 19) + walk, 3, shortSleeves ? 4 : 2);
+  }
+  if (raisedArm === 1) {
+    rect(character.suit, 12, 11, 6, 3);
+    rect(character.skin, 16, 6, 3, 6);
+  } else {
+    rect(character.suit, 12, 15 - walk, 3, 6);
+    rect(character.skin, 12, (shortSleeves ? 18 : 20) - walk, 3, shortSleeves ? 4 : 2);
+  }
   if (shortSleeves) {
     rect(character.skin, 6, 13, 4, 1);
   } else {

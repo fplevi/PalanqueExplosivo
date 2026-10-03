@@ -23,6 +23,7 @@ body[data-screen=game] .topbar{height:60px}
 .game-screen .key-legend{margin-top:12px}
 @media(max-width:510px){.participant canvas{width:18px;height:32px}.game-stage{width:min(640px,100%,calc((100svh - 280px)*15/13))}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+.victory-menu{max-width:440px}.victory-menu #victory-message{font-size:18px;line-height:1.5;min-height:54px;margin-bottom:22px}.victory-copy{min-height:104px}.victory-menu .arcade-button{max-width:350px;margin:0 auto}.victory-screen .title-edition{letter-spacing:1px}
 .home-menu .arcade-button+.arcade-button{margin-top:12px}
 .home-menu .story-button{background:var(--panel);border-color:var(--coral);color:var(--light)}
 .story-button{background:var(--panel);border-color:var(--coral);color:var(--light)}

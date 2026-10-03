@@ -3,6 +3,7 @@ import { CHARACTERS, characterFor } from './characters.js';
 import { drawCharacter, renderArena } from './art.js';
 import { drawTitleScene } from './title-art.js';
 import { TitleAnimation } from './title-animation.js';
+import { VictoryAnimation, drawVictoryScene } from './victory-scene.js';
 import { Story, BOSSES, STORY_SAVE_KEY, storyCharacters } from './story.js';
 
 const $ = id => document.getElementById(id);
@@ -10,9 +11,13 @@ const arena = $('arena');
 const ctx = arena.getContext('2d');
 const titleCtx = $('title-scene').getContext('2d');
 const titleAnimation = new TitleAnimation();
+const victoryCtx = $('victory-scene').getContext('2d');
+let victoryAnimation = null;
+let victoryRevealed = false;
+let lastVictoryWinner = null;
 const dialog = $('help-dialog');
 const pressed = new Map();
-const routes = { home: 'inicio', selection: 'personagens', game: 'partida' };
+const routes = { home: 'inicio', selection: 'personagens', game: 'partida', victory: 'vitoria' };
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 let screen = 'home';
 let selected = CHARACTERS[0];
@@ -40,7 +45,7 @@ function readStory() {
 
 function refreshSave() {
   $('resume-story').hidden = !savedStory;
-  if (savedStory) $('resume-story').textContent = `Retomar: ${characterFor(savedStory.character).name} · Fase ${savedStory.stage + 1}/11`;
+  if (savedStory) $('resume-story').textContent = `Retomar: ${characterFor(savedStory.character).name} · Fase ${savedStory.stage + 1}/${savedStory.totalStages}`;
   $('save-notice').hidden = storageAvailable;
   $('save-notice').textContent = 'Este navegador não permitiu salvar o progresso. A história continua enquanto o jogo estiver aberto.';
 }
@@ -58,7 +63,7 @@ function chooseMode(value) {
   mode = value; story = null;
   $('mode-label').textContent = mode === 'story' ? 'Modo história' : 'Jogo rápido';
   $('selection-hint').textContent = mode === 'story'
-    ? '11 fases · 3 vidas por fase. Lula e Flávio são os chefões do primeiro turno.'
+    ? '5 fases · Você: 3 vidas · Computadores: 1 vida. Na final, ambos têm 3 vidas. Lula e Flávio são os chefões.'
     : 'Uma partida contra três computadores.';
   for (const button of $('roster').children) {
     const locked = mode === 'story' && BOSSES.includes(button.dataset.character);
@@ -100,6 +105,10 @@ function sound(type) {
 function showScreen(target, { record = true, replace = false, focus = true } = {}) {
   const guarded = target === 'game' && !match;
   if (guarded) target = 'selection';
+  if (target === 'victory' && !victoryAnimation && lastVictoryWinner) prepareVictory(lastVictoryWinner);
+  const missingVictory = target === 'victory' && !victoryAnimation;
+  if (missingVictory) target = 'home';
+  if (target !== 'victory') victoryAnimation = null;
   screen = target;
   pressed.clear();
   if (target !== 'game') { phase = 'idle'; match = null; helpPaused = false; }
@@ -107,16 +116,43 @@ function showScreen(target, { record = true, replace = false, focus = true } = {
   document.body.dataset.screen = target;
   for (const section of document.querySelectorAll('main > [data-screen]')) section.hidden = section.dataset.screen !== target;
   const hash = '#' + routes[target];
-  if (record || guarded) {
-    const method = replace || guarded ? 'replaceState' : 'pushState';
-    if (location.hash !== hash || replace || guarded) history[method]({ screen: target }, '', hash);
+  if (record || guarded || missingVictory) {
+    const method = replace || guarded || missingVictory ? 'replaceState' : 'pushState';
+    if (location.hash !== hash || replace || guarded || missingVictory) history[method]({ screen: target }, '', hash);
   }
   window.scrollTo({ top: 0, behavior: 'instant' });
   if (focus) {
-    const focusTarget = target === 'game' ? arena : $(target === 'home' ? 'home-title' : 'selection-title');
+    const focusTarget = target === 'game' ? arena : $(target === 'home' ? 'home-title' : target === 'victory' ? 'victory-title' : 'selection-title');
     focusTarget.focus({ preventScroll: true });
   }
-  announce(target === 'home' ? 'Tela de início.' : target === 'selection' ? 'Seleção de personagens. Use as setas e Enter para jogar.' : 'Tela da partida.');
+  announce(target === 'home' ? 'Tela de início.' : target === 'selection' ? 'Seleção de personagens. Use as setas e Enter para jogar.' : target === 'victory' ? 'Vitória! ' + victoryAnimation.winner.name + ' venceu o Modo história.' : 'Tela da partida.');
+}
+
+function prepareVictory(winner) {
+  lastVictoryWinner = winner;
+  victoryAnimation = new VictoryAnimation(winner);
+  victoryRevealed = false;
+  $('victory-winner').textContent = victoryAnimation.winner.name + ' venceu';
+  $('victory-message').hidden = true;
+  $('arena-overlay').hidden = true;
+}
+
+function showVictory(winner) {
+  prepareVictory(winner);
+  showScreen('victory');
+  renderVictory(0);
+}
+
+function renderVictory(dt) {
+  if (reducedMotion.matches) victoryAnimation.update(5.7);
+  else if (!dialog.open) victoryAnimation.update(dt);
+  const scene = victoryAnimation.snapshot();
+  drawVictoryScene(victoryCtx, scene);
+  if (scene.message && !victoryRevealed) {
+    victoryRevealed = true;
+    $('victory-message').hidden = false;
+    announce(scene.message);
+  }
 }
 
 function paintAvatar(canvas, character, scale = 3) {
@@ -219,7 +255,7 @@ function start() {
 function startMatch() {
   const random = seededRandom(++seed * 991);
   match = new Match({ arena: makeArena(random), players: mode === 'story' ? story.participants() : participantConfig(random), random,
-    lives: mode === 'story' && !story.tie ? 3 : 1, difficulty: mode === 'story' ? 0.2 + story.stage * 0.08 : 1 });
+    lives: 1, difficulty: mode === 'story' ? 0.2 + story.stage / (story.totalStages - 1) * 0.8 : 1 });
   phase = 'countdown'; countdown = 3; countdownNumber = 0;
   showScreen('game');
   drawParticipants(match.snapshot());
@@ -236,7 +272,7 @@ function startMatch() {
 
 function retryStory() {
   if (story.spectating) {
-    story.stage = story.order.length;
+    story.stage = story.preliminaryStages;
     story.finalists = [];
   }
   story.restart(); saveStory(); startMatch();
@@ -265,12 +301,11 @@ function finishStory(view) {
   phase = 'result'; pressed.clear(); $('pause-button').disabled = true;
   if (outcome.kind === 'complete') {
     saveStory();
+    if (!story.spectating) { showVictory(outcome.winner); return; }
     const winner = characterFor(outcome.winner).name;
-    const title = story.spectating ? 'Segundo turno encerrado' : 'Vitória!';
-    const text = story.spectating ? `${winner} venceu o segundo turno. Você falhou em acabar com o ciclo de amor e ódio`
-      : `${winner} venceu! Você acabou com o ciclo de amor e ódio.`;
-    overlay(title, text, story.spectating ? 'Tentar novamente' : 'Nova história', true, {
-      primary: story.spectating ? retryStory : () => chooseMode('story'), secondary: () => showScreen('home'), secondaryLabel: 'Sair',
+    const text = `${winner} venceu o segundo turno. Você falhou em acabar com o ciclo de amor e ódio`;
+    overlay('Segundo turno encerrado', text, 'Tentar novamente', true, {
+      primary: retryStory, secondary: () => showScreen('home'), secondaryLabel: 'Sair',
     });
   } else {
     saveStory();
@@ -278,7 +313,7 @@ function finishStory(view) {
     const title = outcome.kind === 'tie' ? 'Desempate!' : story.final ? 'Segundo turno!' : 'Fase vencida!';
     const opponents = story.participants().filter(player => player.character !== selected.id).map(player => characterFor(player.character).name).join(' e ');
     const text = outcome.kind === 'tie' ? 'A vaga ficou empatada. Nova arena, uma vida por participante.'
-      : story.final ? `Você se classificou. A final será contra ${opponents}.` : `Próximo confronto: ${opponents}. Todos começam com três vidas.`;
+      : story.final ? `Você se classificou. A final será contra ${opponents}. Ambos começam com três vidas.` : `Próximo confronto: ${opponents}. Você tem três vidas; cada computador tem uma.`;
     overlay(title, text, outcome.kind === 'tie' ? 'Jogar desempate' : 'Próxima fase', true, {
       primary: startMatch, secondary: () => showScreen('home'), secondaryLabel: 'Sair',
     });
@@ -328,6 +363,8 @@ function openHelp() {
 $('home-button').addEventListener('click', () => showScreen('home'));
 $('begin-button').addEventListener('click', () => chooseMode('quick'));
 $('story-button').addEventListener('click', () => chooseMode('story'));
+$('victory-restart').addEventListener('click', () => chooseMode('story'));
+$('victory-exit').addEventListener('click', () => showScreen('home'));
 $('resume-story').addEventListener('click', () => {
   if (!savedStory) return;
   const restored = Story.restore(savedStory.serialize());
@@ -360,6 +397,11 @@ window.addEventListener('keydown', event => {
   if (dialog.open) return;
   const key = event.key.toLowerCase();
   const onButton = event.target instanceof Element && event.target.closest('button');
+  if (screen === 'victory') {
+    if (key === 'escape') { event.preventDefault(); showScreen('home'); }
+    else if (key === 'enter' && !onButton) { event.preventDefault(); chooseMode('story'); }
+    return;
+  }
   if (screen === 'home') {
     if (key === 'enter' && !onButton) { event.preventDefault(); chooseMode('quick'); }
     return;
@@ -434,7 +476,7 @@ function updateGame(dt) {
   $('timer').classList.toggle('danger-timer', seconds <= 30);
   const human = view.players.find(player => player.id === 'human');
   $('bomb-stat').textContent = human?.capacity ?? '—'; $('range-stat').textContent = human?.range ?? '—'; $('speed-stat').textContent = human?.speed ?? '—';
-  if (mode === 'story' && !story.spectating && story.eliminatedFirst(view)) { failStory(); return; }
+  if (mode === 'story' && story.failedDuringMatch(view)) { failStory(); return; }
   if (view.status === 'finished') finish(view);
 }
 
@@ -446,7 +488,11 @@ function frame(now) {
     const scene = reducedMotion.matches ? undefined : titleAnimation.snapshot();
     drawTitleScene(titleCtx, reducedMotion.matches ? 0 : scene.time, scene);
   }
-  else if (screen === 'game' && match) { updateGame(dt); renderArena(ctx, match.snapshot(), now / 1000); }
+  else if (screen === 'victory' && victoryAnimation) renderVictory(dt);
+  else if (screen === 'game' && match) {
+    updateGame(dt);
+    if (screen === 'game' && match) renderArena(ctx, match.snapshot(), now / 1000);
+  }
   requestAnimationFrame(frame);
 }
 

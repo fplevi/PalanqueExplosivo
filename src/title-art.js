@@ -3,7 +3,7 @@ import { TitleAnimation } from './title-animation.js';
 
 const stillScene = new TitleAnimation(() => 0.5).snapshot();
 
-export function drawTitleScene(ctx, time = 0, scene = stillScene) {
+export function drawTitleBackdrop(ctx) {
   ctx.imageSmoothingEnabled = false;
   ctx.clearRect(0, 0, 640, 224);
   const rect = (color, x, y, w, h) => { ctx.fillStyle = color; ctx.fillRect(x, y, w, h); };
@@ -43,6 +43,16 @@ export function drawTitleScene(ctx, time = 0, scene = stillScene) {
     rect('#435967', x + 19, 194, 3, 16);
     rect('#3a5260', x, 207, 22, 3);
   }
+  for (const x of [35, 595]) {
+    rect('#162c38', x, 180, 11, 31);
+    rect('#f6c46c', x + 2, 181, 7, 7);
+    rect('#e1dfd0', x + 3, 182, 5, 3);
+  }
+}
+
+export function drawTitleScene(ctx, time = 0, scene = stillScene) {
+  drawTitleBackdrop(ctx);
+  const rect = (color, x, y, w, h) => { ctx.fillStyle = color; ctx.fillRect(x, y, w, h); };
   const holder = scene.characters.find(character => character.id === scene.holder);
   const recipient = scene.characters.find(character => character.id === scene.recipient);
   const passing = scene.phase === 'passing';
@@ -60,12 +70,8 @@ export function drawTitleScene(ctx, time = 0, scene = stillScene) {
     const facing = active ? (character.id === scene.holder ? direction : -direction) > 0 ? 1 : 3 : 2;
     ctx.save();
     if (scene.phase === 'exploding' && character.id === scene.holder) ctx.globalAlpha *= 1 - scene.progress;
-    drawCharacter(ctx, character, character.x - 12, 148, 1.5, facing);
-    if (active && scene.phase !== 'exploding') {
-      const armDirection = character.id === scene.holder ? direction : -direction;
-      rect(character.suit, character.x + (armDirection > 0 ? 10 : -16), 164, 6, 5);
-      rect(character.skin, character.x + (armDirection > 0 ? 14 : -18), 157, 4, 8);
-    }
+    const raisedArm = active && scene.phase !== 'exploding' ? (character.id === scene.holder ? direction : -direction) : 0;
+    drawCharacter(ctx, character, character.x - 12, 148, 1.5, facing, 0, raisedArm);
     ctx.restore();
   }
   if (scene.phase === 'exploding') {
@@ -81,10 +87,4 @@ export function drawTitleScene(ctx, time = 0, scene = stillScene) {
     const bombY = 143 - Math.sin(progress * Math.PI) * arcHeight;
     drawBomb(ctx, bombX - 10, bombY, time, 0.85);
   }
-  for (const x of [35, 595]) {
-    rect('#162c38', x, 180, 11, 31);
-    rect('#f6c46c', x + 2, 181, 7, 7);
-    rect('#e1dfd0', x + 3, 182, 5, 3);
-  }
-  rect('#34435d', 91, 218, 458, 3);
 }

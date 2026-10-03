@@ -40,21 +40,24 @@ export class Story {
     this.completed = false;
   }
 
-  get semifinal() { return this.stage === this.order.length; }
-  get final() { return this.stage === this.order.length + 1; }
-  get totalStages() { return this.order.length + 2; }
+  get preliminaryStages() { return Math.ceil(this.order.length / 3); }
+  get semifinal() { return this.stage === this.preliminaryStages; }
+  get final() { return this.stage === this.preliminaryStages + 1; }
+  get totalStages() { return this.preliminaryStages + 2; }
   get title() {
-    const name = this.semifinal ? 'Primeiro turno' : this.final ? 'Segundo turno' : 'Duelo eleitoral';
+    const name = this.semifinal ? 'Primeiro turno' : this.final ? 'Segundo turno' : 'Disputa eleitoral';
     return `Fase ${this.stage + 1}/${this.totalStages} · ${this.tie ? 'Desempate' : name}`;
   }
 
   participants() {
-    const characters = this.tie?.tied ?? (this.semifinal ? [this.character, ...BOSSES] : this.final ? this.finalists : [this.character, this.order[this.stage]]);
-    const corners = [[1, 1], [13, 11], [13, 1]];
+    const characters = this.tie?.tied ?? (this.semifinal ? [this.character, ...BOSSES] : this.final ? this.finalists
+      : [this.character, ...this.order.slice(this.stage * 3, this.stage * 3 + 3)]);
+    const corners = [[1, 1], [13, 11], [13, 1], [1, 11]];
     return characters.map((character, index) => ({
       id: character === this.character ? 'human' : character,
       character, x: corners[index][0], y: corners[index][1],
       bot: this.spectating || character !== this.character,
+      lives: this.tie ? 1 : this.final || (!this.spectating && character === this.character) ? 3 : 1,
     }));
   }
 
@@ -62,8 +65,15 @@ export class Story {
 
   // A single, untied third place is a failure before the two bots finish.
   eliminatedFirst(view) {
-    return this.semifinal && !this.tie && view.eliminationGroups[0]?.length === 1
+    return this.semifinal && (!this.tie || this.tie.slots === 2) && view.eliminationGroups[0]?.length === 1
       && view.eliminationGroups[0][0] === 'human';
+  }
+
+  failedDuringMatch(view) {
+    if (this.spectating || view.status === 'finished') return false;
+    const human = view.players.find(player => player.id === 'human');
+    if (!human || human.alive) return false;
+    return !this.semifinal || this.eliminatedFirst(view);
   }
 
   resolve(view) {
@@ -87,26 +97,29 @@ export class Story {
   }
 
   serialize() {
-    return JSON.stringify({ version: 1, character: this.character, order: this.order, stage: this.stage,
+    return JSON.stringify({ version: 2, character: this.character, order: this.order, stage: this.stage,
       finalists: this.finalists, spectating: this.final && this.spectating, completed: this.completed });
   }
 
   static restore(value) {
     try {
       const data = JSON.parse(value);
-      if (data?.version !== 1) return null;
+      if (![1, 2].includes(data?.version) || !Number.isInteger(data.stage) || data.stage < 0) return null;
       const story = new Story(data.character, () => 0);
+      // Keep existing campaigns: each three old duels now form one preliminary phase.
+      const stage = data.version === 1 ? data.stage < story.order.length ? Math.floor(data.stage / 3)
+        : story.preliminaryStages + data.stage - story.order.length : data.stage;
       if (!Array.isArray(data.order) || data.order.length !== story.order.length
         || new Set(data.order).size !== data.order.length || data.order.some(id => !story.order.includes(id))
-        || !Number.isInteger(data.stage) || data.stage < 0 || data.stage >= story.totalStages
+        || stage >= story.totalStages
         || typeof data.spectating !== 'boolean' || typeof data.completed !== 'boolean'
         || !Array.isArray(data.finalists)) return null;
-      if (data.stage === story.totalStages - 1 && (data.finalists.length !== 2
+      if (stage === story.totalStages - 1 && (data.finalists.length !== 2
         || new Set(data.finalists).size !== 2 || data.finalists.some(id => ![data.character, ...BOSSES].includes(id))
         || (!data.spectating && !data.finalists.includes(data.character))
         || (data.spectating && data.finalists.includes(data.character)))) return null;
-      Object.assign(story, { order: data.order, stage: data.stage, finalists: data.finalists,
-        spectating: data.stage === story.totalStages - 1 && data.spectating, completed: data.completed });
+      Object.assign(story, { order: data.order, stage, finalists: data.finalists,
+        spectating: stage === story.totalStages - 1 && data.spectating, completed: data.completed });
       return story.completed ? null : story;
     } catch { return null; }
   }
