@@ -24,3 +24,15 @@ body[data-screen=game] .console-footer{display:none}
 .game-screen .key-legend{margin-top:12px}
 @media(max-width:510px){.participant canvas{width:18px;height:32px}.game-stage{width:min(640px,100%,calc((100svh - 280px)*15/13))}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+.home-menu .story-button{margin-top:12px;background:var(--panel);border-color:var(--coral);color:var(--light)}
+.story-button{background:var(--panel);border-color:var(--coral);color:var(--light)}
+.story-button:hover{background:#465171}
+.selection-hint{margin:-10px 0 22px;color:var(--muted);font-size:14px;line-height:1.5}
+.character-card:disabled{opacity:.5;filter:grayscale(.65)}
+.character-card:disabled small{color:var(--gold)}
+.home-menu .save-notice{font-size:12px;line-height:1.4;color:var(--coral);margin:12px 0}
+.overlay-panel #overlay-watch{margin-top:12px}
+.game-over #overlay-title{color:var(--coral);font-size:clamp(20px,4vw,30px)}
+.participants{justify-content:space-around}
+.participant small{white-space:normal}
+@media(max-width:510px){.selection-hint{font-size:12px}.player-marker{display:inline-block;font-size:10px;padding:5px}.screen-heading h1{font-size:18px}.game-over #overlay-title{font-size:20px}.overlay-panel p{margin-bottom:14px}.overlay-panel>.text-button{margin-top:6px}.overlay-panel .arcade-button{min-height:40px;padding:9px 14px}.home-footnote{margin-top:12px}}

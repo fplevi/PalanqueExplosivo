@@ -162,10 +162,12 @@ export class Match {
         if (this.arena[y][x] === 'floor') candidates.push({ x, y });
       }
     }
-    if (!candidates.length) { this.eliminate(player, 'no-space'); return; }
     const hazards = this.forecast();
-    const cell = candidates.filter(({ x, y }) => this.walkable(x, y)
-      && !this.players.some(other => other !== player && other.alive && !other.respawning && other.x === x && other.y === y)
+    const freeCells = candidates.filter(({ x, y }) =>
+      !this.players.some(other => other !== player && other.alive && !other.respawning && other.x === x && other.y === y)
+      && !(hazards.get(`${x},${y}`) ?? []).some(window => window.end === Infinity && window.start <= 2));
+    if (!freeCells.length) { this.eliminate(player, 'no-space'); return; }
+    const cell = freeCells.filter(({ x, y }) => this.walkable(x, y)
       && !(hazards.get(`${x},${y}`) ?? []).some(window => window.start <= 2))
       .sort((a, b) => Math.abs(a.x - player.spawnX) + Math.abs(a.y - player.spawnY)
         - Math.abs(b.x - player.spawnX) - Math.abs(b.y - player.spawnY))[0];
@@ -268,9 +270,11 @@ export class Match {
       const start = timings.get(bomb.id);
       for (const cell of cells.get(bomb.id)) add(cell.x, cell.y, start, start + FLAME_DURATION);
     }
-    for (let index = this.fallIndex; index < Math.min(this.fallIndex + 8, this.fallingBlocks.length); index++) {
-      const cell = this.fallingBlocks[index];
-      add(cell.x, cell.y, Math.max(0, this.nextFallAt - this.elapsed + (index - this.fallIndex) * 0.5), Infinity);
+    if (this.nextFallAt - this.elapsed <= 5) {
+      for (let index = this.fallIndex; index < Math.min(this.fallIndex + 8, this.fallingBlocks.length); index++) {
+        const cell = this.fallingBlocks[index];
+        add(cell.x, cell.y, Math.max(0, this.nextFallAt - this.elapsed + (index - this.fallIndex) * 0.5), Infinity);
+      }
     }
     return hazards;
   }

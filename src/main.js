@@ -386,6 +386,7 @@ window.addEventListener('keydown', event => {
   if (movement.has(key) || key === ' ' || key === 'p' || key === 'escape') event.preventDefault();
   if ((key === 'p' || key === 'escape') && !event.repeat) togglePause();
   if (match.snapshot().status !== 'running') return;
+  if (mode === 'story' && story.spectating) return;
   if (movement.has(key) && !event.repeat) { pressed.set(key, performance.now()); match.move('human', ...movement.get(key)); }
   if (key === ' ' && !event.repeat) match.placeBomb('human');
 });
@@ -410,7 +411,7 @@ function updateGame(dt) {
   }
   if (phase !== 'playing') return;
   const latest = [...pressed].sort((a, b) => b[1] - a[1])[0];
-  if (latest) match.move('human', ...movement.get(latest[0]));
+  if (latest && (mode !== 'story' || !story.spectating)) match.move('human', ...movement.get(latest[0]));
   match.update(dt);
   const view = match.snapshot();
   for (const event of match.takeEvents()) {

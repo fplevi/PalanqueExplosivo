@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.mjs",
     "test": "node --test",
-    "check": "node --check src/engine.js && node --check src/art.js && node --check src/title-art.js && node --check src/main.js && node --check server.mjs"
+    "check": "node --check src/engine.js && node --check src/story.js && node --check src/art.js && node --check src/title-art.js && node --check src/main.js && node --check server.mjs"
   },
   "engines": { "node": ">=20" }
 }

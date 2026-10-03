@@ -88,7 +88,7 @@ export class Story {
 
   serialize() {
     return JSON.stringify({ version: 1, character: this.character, order: this.order, stage: this.stage,
-      finalists: this.finalists, spectating: this.spectating, completed: this.completed });
+      finalists: this.finalists, spectating: this.final && this.spectating, completed: this.completed });
   }
 
   static restore(value) {
@@ -103,9 +103,10 @@ export class Story {
         || !Array.isArray(data.finalists)) return null;
       if (data.stage === story.totalStages - 1 && (data.finalists.length !== 2
         || new Set(data.finalists).size !== 2 || data.finalists.some(id => ![data.character, ...BOSSES].includes(id))
-        || (!data.spectating && !data.finalists.includes(data.character)))) return null;
+        || (!data.spectating && !data.finalists.includes(data.character))
+        || (data.spectating && data.finalists.includes(data.character)))) return null;
       Object.assign(story, { order: data.order, stage: data.stage, finalists: data.finalists,
-        spectating: data.spectating, completed: data.completed });
+        spectating: data.stage === story.totalStages - 1 && data.spectating, completed: data.completed });
       return story.completed ? null : story;
     } catch { return null; }
   }

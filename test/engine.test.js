@@ -66,10 +66,73 @@ test('pausing freezes the bomb fuse and timer and resuming allows the explosion'
   assert.equal(match.snapshot().winner, 'bot');
 });
 
-test('time expiring with multiple survivors produces a draw', () => {
-  const match = new Match({ arena: emptyArena(), players: players(), duration: 1 });
+test('time expiring starts Morte súbita and a falling block eliminates the participant below it', () => {
+  const match = new Match({ arena: emptyArena(), players: [{ id: 'human', x: 1, y: 1 }, { id: 'bot', x: 3, y: 3 }], duration: 1 });
   match.update(1.1);
-  assert.equal(match.snapshot().status, 'finished'); assert.equal(match.snapshot().winner, null);
+  const view = match.snapshot();
+  assert.equal(view.suddenDeath, true);
+  assert.equal(view.arena[1][1], 'crushed');
+  assert.equal(view.status, 'finished'); assert.equal(view.winner, 'bot');
+  assert.equal(match.move('human', 1, 0), false);
+});
+
+test('Modo história loses three lives before elimination, with protected respawns in the same arena', () => {
+  const match = new Match({ arena: emptyArena(), players: players(), lives: 3 });
+  match.placeBomb('human'); match.update(2.1);
+  let human = match.snapshot().players[0];
+  assert.equal(human.lives, 2); assert.equal(human.alive, true);
+  assert.ok(human.invulnerable > 0);
+  assert.deepEqual(match.snapshot().eliminationGroups, []);
+  match.placeBomb('human'); match.update(2.2);
+  human = match.snapshot().players[0];
+  assert.equal(human.lives, 1); assert.equal(human.alive, true);
+  match.placeBomb('human'); match.update(2.2);
+  assert.equal(match.snapshot().players[0].alive, false);
+  assert.equal(match.snapshot().winner, 'bot');
+  assert.deepEqual(match.snapshot().eliminationGroups, [['human']]);
+});
+
+test('falling blocks ignore temporary protection and remain indestructible to bombs', () => {
+  const match = new Match({ arena: emptyArena(), players: [{ id: 'human', x: 1, y: 1, invulnerable: 50 }, { id: 'bot', x: 3, y: 3 }], lives: 3, duration: 1 });
+  match.update(1.01);
+  const view = match.snapshot();
+  assert.equal(view.players[0].lives, 2);
+  assert.equal(view.players[0].alive, true);
+  assert.notDeepEqual([view.players[0].x, view.players[0].y], [1, 1]);
+  assert.equal(view.arena[1][1], 'crushed');
+  assert.equal(match.move('human', -1, -1), false);
+  assert.ok(!match.blastCells({ x: 2, y: 1, range: 5 }).some(cell => cell.x === 1 && cell.y === 1));
+});
+
+test('Morte súbita keeps the match running until elimination and closes the arena from the border inward', () => {
+  const match = new Match({ arena: emptyArena(), players: [{ id: 'human', x: 2, y: 2 }, { id: 'bot', x: 3, y: 3 }], duration: 1 });
+  match.update(1.01);
+  assert.equal(match.snapshot().status, 'running');
+  assert.deepEqual(match.snapshot().nextBlock, { x: 2, y: 1, in: match.snapshot().nextBlock.in });
+  match.update(0.5);
+  assert.equal(match.snapshot().arena[1][2], 'crushed');
+  assert.equal(match.snapshot().arena[2][2], 'floor');
+  match.update(30);
+  assert.equal(match.snapshot().status, 'finished');
+});
+
+test('eliminations in one explosion are recorded as a tied group', () => {
+  const match = new Match({ arena: emptyArena(), players: [{ id: 'human', x: 1, y: 1 }, { id: 'a', x: 3, y: 1 }, { id: 'b', x: 5, y: 5 }] });
+  match.placeBomb('human'); match.update(2.01);
+  assert.deepEqual(match.snapshot().eliminationGroups, [['human', 'a']]);
+  assert.equal(match.snapshot().winner, 'b');
+});
+
+test('a crushed participant is eliminated when the only remaining floor is occupied, preserving elimination order', () => {
+  const arena = emptyArena().map(row => row.map(() => 'wall'));
+  arena[1][1] = 'floor'; arena[1][2] = 'floor';
+  const match = new Match({ arena, players: [{ id: 'human', x: 1, y: 1 }, { id: 'bot', x: 2, y: 1 }], lives: 3, duration: 1 });
+  match.update(1.01);
+  const view = match.snapshot();
+  assert.equal(view.players[0].alive, false);
+  assert.equal(view.players[1].lives, 3);
+  assert.equal(view.winner, 'bot');
+  assert.deepEqual(view.eliminationGroups, [['human']]);
 });
 
 test('a revealed improvement stays hidden during the blast and is collected afterward', () => {

@@ -8,6 +8,10 @@ export function drawCharacter(ctx, character, x, y, scale = 1, facing = 2, step 
   ctx.scale(scale, scale);
   const rect = (color, rx, ry, width, height) => { ctx.fillStyle = color; ctx.fillRect(rx, ry, width, height); };
   const dark = '#192c30';
+  const noseColor = '#' + character.skin.slice(1).match(/.{2}/g)
+    .map(channel => Math.round(parseInt(channel, 16) * 0.88).toString(16).padStart(2, '0')).join('');
+  const noseWidth = character.noseWidth ?? 2;
+  const eyeColor = character.eyeColor ?? '#624735';
   const walk = step % 2;
   rect('rgba(9,34,23,0.26)', 1, 23, 14, 3);
   rect(dark, 3, 12, 10, 10);
@@ -63,15 +67,15 @@ export function drawCharacter(ctx, character, x, y, scale = 1, facing = 2, step 
     rect(character.suit, 5, 13, 6, 7);
   } else {
     if (facing === 1) {
-      rect(dark, 10, 6, 2, 2);
-      rect(character.skin, 13, 7, 2, 2);
+      rect(eyeColor, 10, 7, 1, 1);
+      rect(noseColor, 13, 7, noseWidth, 2);
     } else if (facing === 3) {
-      rect(dark, 4, 6, 2, 2);
-      rect(character.skin, 1, 7, 2, 2);
+      rect(eyeColor, 5, 7, 1, 1);
+      rect(noseColor, 3 - noseWidth, 7, noseWidth, 2);
     } else {
-      rect(dark, 4, 6, 2, 2);
-      rect(dark, 10, 6, 2, 2);
-      rect('#f4cc9b', 7, 8, 2, 2);
+      rect(eyeColor, 5, 7, 1, 1);
+      rect(eyeColor, 10, 7, 1, 1);
+      rect(noseColor, Math.floor((16 - noseWidth) / 2), 8, noseWidth, 2);
     }
     if (character.glasses) {
       const glassesColor = character.glassesColor ?? '#304246';
