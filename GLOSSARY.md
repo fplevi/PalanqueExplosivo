@@ -16,6 +16,9 @@ Etapa da progressão no Modo história, disputada em uma arena.
 **Segundo turno**:
 Fase final do Modo história, disputada pelos dois personagens mais bem colocados na penúltima fase.
 
+**Morte súbita**:
+Período da partida em que blocos caem na arena e matam os personagens atingidos.
+
 **Personagem**:
 Representação jogável de uma pessoa do elenco.
 _Avoid_: Candidato, quando o termo designar a entidade dentro do jogo.

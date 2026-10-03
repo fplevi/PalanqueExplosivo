@@ -17,14 +17,17 @@ Rascunho em definição com o usuário; ainda não liberado para implementação
 - Nas demais fases, Game Over oferece apenas Tentar novamente e Sair.
 - Tentar novamente recupera as três vidas do jogador e retoma o estado imediatamente anterior à eliminação, conforme proposta aceita na entrevista.
 - Assistir está disponível somente para as duas últimas fases. Eliminado primeiro na penúltima, o jogador pode acompanhar os bots até o fim e assistir ao Segundo turno entre eles.
+- A campanha tem 11 fases: nove duelos contra os demais personagens em ordem sorteada no início, a penúltima fase e o Segundo turno.
+- Terminar a penúltima fase em segundo lugar classifica o jogador sem Game Over. Ambos os finalistas começam o Segundo turno com três vidas.
+- A dificuldade da IA aumenta ao longo da campanha, com as mesmas regras e atributos para todos e sem poderes exclusivos dos chefões nesta versão.
+- O progresso é salvo localmente: fase, personagem escolhido e ordem dos adversários. Ao voltar após sair ou fechar o jogo, a fase atual reinicia com três vidas para todos.
+- No Modo história, o fim do cronômetro dá lugar à Morte súbita: blocos caem na arena e matam personagens atingidos, em vez de encerrar a partida empatada.
 
 ## Decisões pendentes
 
-- Quantidade e ordem dos duelos anteriores aos chefões.
-- Tratamento do jogador que termina a penúltima fase em segundo lugar: classificação versus Game Over.
-- Limite de tempo no Modo história (o motor atual encerra em empate após 150 segundos).
-- Progressão de dificuldade e diferenças dos chefões.
-- Persistência da campanha ao sair ou fechar a página.
+- Início, frequência e trajeto dos blocos na Morte súbita.
+- Impacto do esmagamento sobre vidas, reaparecimento e Tentar novamente quando a arena estiver tomada.
+- Aplicação da Morte súbita também ao Jogo rápido.
 
 ## Fatos do jogo atual
 
@@ -35,3 +38,4 @@ Rascunho em definição com o usuário; ainda não liberado para implementação
 ## Comments
 
 - 2026-10-03: usuário aprovou reaparecimento com três vidas para todos e desempate com uma vida. Ajustou os botões de derrota para Tentar novamente/Sair, acrescentando Assistir somente na penúltima fase.
+- 2026-10-03: usuário aprovou 11 fases, classificação do segundo colocado, dificuldade crescente e salvamento local. Substituiu a proposta de partida sem limite de tempo por Morte súbita com blocos caindo.
