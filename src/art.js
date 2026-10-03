@@ -14,10 +14,15 @@ export function drawCharacter(ctx, character, x, y, scale = 1, facing = 2, step 
   rect(character.suit, 4, 13, 8, 8);
   rect(character.suit, 1, 14 + walk, 3, 6);
   rect(character.suit, 12, 15 - walk, 3, 6);
-  rect(character.skin, 1, 19 + walk, 3, 2);
-  rect(character.skin, 12, 20 - walk, 3, 2);
-  rect('#e7e3ce', 6, 13, 4, 5);
-  rect(character.color, 7, 14, 2, 6);
+  const shortSleeves = character.outfit === 'tshirt';
+  rect(character.skin, 1, (shortSleeves ? 17 : 19) + walk, 3, shortSleeves ? 4 : 2);
+  rect(character.skin, 12, (shortSleeves ? 18 : 20) - walk, 3, shortSleeves ? 4 : 2);
+  if (shortSleeves) {
+    rect(character.skin, 6, 13, 4, 1);
+  } else {
+    rect('#e7e3ce', 6, 13, 4, 5);
+    rect(character.color, 7, 14, 2, 6);
+  }
   rect(dark, 4, 21, 3, 3 + walk);
   rect(dark, 9, 21, 3, 4 - walk);
   rect('#151f27', 3, 24 + walk, 5, 2);

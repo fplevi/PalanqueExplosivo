@@ -4,6 +4,18 @@ Vocabulário do jogo de arena com bombas e personagens inspirados em políticos 
 
 ## Language
 
+**Jogo rápido**:
+Modo de jogo com quatro participantes em uma partida independente.
+
+**Modo história**:
+Modo de jogo em que um jogador enfrenta personagens controlados pelo computador numa sequência de disputas inspiradas em eleições.
+
+**Fase**:
+Etapa da progressão no Modo história, disputada em uma arena.
+
+**Segundo turno**:
+Fase final do Modo história, disputada pelos dois personagens mais bem colocados na penúltima fase.
+
 **Personagem**:
 Representação jogável de uma pessoa do elenco.
 _Avoid_: Candidato, quando o termo designar a entidade dentro do jogo.

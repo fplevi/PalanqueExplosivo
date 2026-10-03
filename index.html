@@ -3,46 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#173f33">
-  <title>Bomber Políticos — a disputa vai explodir</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23173f33'/%3E%3Ccircle cx='15' cy='19' r='9' fill='%23f4ca65'/%3E%3Cpath d='M19 11v-5h5' stroke='%23f4ca65' stroke-width='3' fill='none'/%3E%3C/svg%3E">
+  <meta name="theme-color" content="#252b46">
+  <title>Bomber Políticos</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23252b46'/%3E%3Ccircle cx='15' cy='19' r='9' fill='%23f6c46c'/%3E%3Cpath d='M19 11v-5h5' stroke='%23f6c46c' stroke-width='3' fill='none'/%3E%3C/svg%3E">
+  <link rel="preload" href="/assets/fonts/PressStart2P-Regular.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="/style.css">
   <script type="module" src="/src/main.js"></script>
 </head>
-<body>
-  <header class="header shell">
-    <a class="brand" href="/" aria-label="Bomber Políticos, início"><span class="brand-icon" aria-hidden="true">✹</span><span>BOMBER<span class="brand-second">POLÍTICOS<span class="brand-dot">.</span></span></span></a>
-    <div class="header-right"><span class="edition">ARCADE BRASILEIRO · 2026</span><button id="sound-button" class="icon-button" aria-label="Ativar som" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path id="sound-mark" d="m16 9 5 6m0-6-5 6"/></svg></button><button id="help-button" class="icon-button" aria-label="Como jogar">?</button></div>
-  </header>
-  <main class="shell">
-    <section class="hero">
-      <div class="intro">
-        <div class="eyebrow"><span class="status-dot"></span> A ARENA ESTÁ ABERTA</div>
-        <h1>A disputa<br>vai <span>explodir<span class="heading-spark" aria-hidden="true">✳</span></span></h1>
-        <p class="intro-description">Escolha seu personagem.<br>Abra caminho. Seja o último de pé.</p>
-        <div class="selected-preview"><canvas id="selected-avatar" width="64" height="112" aria-hidden="true"></canvas><div><span class="micro-label">SEU PERSONAGEM</span><strong id="selected-name">Lula</strong><span id="selected-party" class="party-label">PT</span></div><span class="selected-check" aria-hidden="true">✓</span></div>
-        <button class="start-button" id="start-button"><span class="play-symbol" aria-hidden="true">▶</span><span id="start-label">BORA JOGAR</span><span aria-hidden="true">↗</span></button>
-        <p class="match-note">VOCÊ + 3 BOTS <span>·</span> TODO MUNDO COMEÇA IGUAL</p>
-        <div class="controls-hint"><div><span class="key-group"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span><small>mover</small></div><span class="control-divider"></span><div><kbd class="space-key">ESPAÇO</kbd><small>soltar bomba</small></div></div>
-      </div>
-      <div class="arena-section">
-        <div class="arena-topline"><span><span class="tiny-square"></span> PRAÇA DA DISPUTA</span><span class="arena-tag">15 × 13</span></div>
-        <div class="arcade-cabinet">
-          <div class="scoreboard"><span id="match-state"><span class="live-dot"></span> PRONTO PRA JOGAR</span><strong id="timer">02:30</strong><button id="pause-button" aria-label="Pausar partida" disabled>Ⅱ</button></div>
-          <div class="canvas-wrap"><canvas id="arena" width="480" height="416" tabindex="0" aria-label="Arena do Bomber Políticos. Use WASD ou setas para mover e espaço para colocar bombas."></canvas><div id="arena-overlay" class="arena-overlay" hidden><div id="overlay-title"></div><p id="overlay-text"></p><button id="overlay-button" class="overlay-button" hidden>CONTINUAR</button></div></div>
-          <div class="arena-bottom"><span><i class="pixel-bomb" aria-hidden="true"></i> <b id="bomb-stat">1</b> BOMBA</span><span>✦ <b id="range-stat">2</b> ALCANCE</span><span>↯ <b id="speed-stat">1</b> VELOCIDADE</span><span class="arena-bottom-note">P / ESC · PAUSA</span></div>
+<body data-screen="home">
+  <div class="console-shell">
+    <header class="topbar">
+      <button id="home-button" class="wordmark" aria-label="Bomber Políticos, voltar ao início"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 9h8v2h3v8h-3v3H7v-3H4v-8h4z"/><path d="M13 9V4h6V1h3v6h-6v2z"/></svg><span>Bomber Políticos</span></button>
+      <nav aria-label="Etapas do jogo"><ol class="screen-progress"><li data-step="home" aria-current="step"><span>1</span>Início</li><li data-step="selection"><span>2</span>Personagens</li><li data-step="game"><span>3</span>Partida</li></ol></nav>
+      <div class="utilities"><button id="sound-button" class="utility-button" aria-label="Ativar som" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path id="sound-mark" d="m16 9 5 6m0-6-5 6"/></svg></button><button id="help-button" class="utility-button" aria-label="Como jogar">?</button></div>
+    </header>
+
+    <main>
+      <section id="home-screen" class="screen home-screen" data-screen="home" aria-labelledby="home-title">
+        <div class="title-lockup"><h1 id="home-title" tabindex="-1">Bomber<br>Políticos</h1><span class="title-edition">Edição Brasil 2026</span></div>
+        <canvas id="title-scene" width="640" height="224" aria-label="Cena em pixel art com personagens na arena e um horizonte inspirado em Brasília"></canvas>
+        <div class="home-menu"><p>Quatro personagens na arena.<br>Seja o último de pé.</p><button id="begin-button" class="arcade-button primary-button"><span class="pixel-cursor" aria-hidden="true"></span>Iniciar jogo</button><button id="home-help" class="text-button">Como jogar</button></div>
+        <div class="home-footnote"><span>1 jogador contra 3 bots</span><span>Gráficos em pixel art</span></div>
+      </section>
+
+      <section id="selection-screen" class="screen selection-screen" data-screen="selection" aria-labelledby="selection-title" hidden>
+        <div class="screen-heading"><button id="selection-back" class="back-button"><span aria-hidden="true">‹</span> Início</button><h1 id="selection-title" tabindex="-1">Escolha seu personagem</h1><span class="player-marker">Jogador 1</span></div>
+        <div class="selection-layout">
+          <div class="selected-panel"><div class="portrait-stage"><span class="portrait-marker" aria-hidden="true">P1</span><canvas id="selected-avatar" width="192" height="256" aria-hidden="true"></canvas><span class="portrait-floor" aria-hidden="true"></span></div><div class="selected-identity"><h2 id="selected-name">Lula</h2><p id="selected-full-name">Luiz Inácio Lula da Silva</p><span id="selected-party" class="party-label">PT</span></div><div class="base-stats"><span><b>1</b> bomba</span><span><b>2</b> alcance</span><span><b>1</b> velocidade</span></div></div>
+          <div class="roster-panel"><div id="roster" class="roster" role="group" aria-label="Seleção de personagem"></div><div class="selection-confirm"><p>Todos começam com os mesmos atributos.</p><button id="start-button" class="arcade-button primary-button"><span id="start-label">Jogar com Lula</span><span class="pixel-cursor" aria-hidden="true"></span></button></div></div>
         </div>
-        <div id="participants" class="participants" aria-label="Participantes da partida"></div>
-      </div>
-    </section>
-    <section class="roster-section" aria-labelledby="roster-title">
-      <div class="section-heading"><div><span class="section-number">01 /</span><h2 id="roster-title">Escolha seu lado da arena<span>.</span></h2></div><span class="section-caption">12 PERSONAGENS · UMA REGRA: SOBREVIVER</span></div>
-      <div id="roster" class="roster" role="group" aria-label="Seleção de personagem"></div>
-    </section>
-    <section class="guide-strip" aria-label="Dicas para jogar"><div><span class="guide-number">01</span><p><strong>Abra caminho.</strong> Exploda os blocos para explorar a arena.</p></div><div><span class="guide-number">02</span><p><strong>Fique mais forte.</strong> Colete bombas, alcance e velocidade.</p></div><div><span class="guide-number">03</span><p><strong>Saia de perto.</strong> A sua própria bomba também pega você.</p></div></section>
-  </main>
-  <footer class="shell footer"><span>BOMBER POLÍTICOS <span class="footer-dot">✳</span> FEITO PRA JOGAR.</span><span>Um jogo de humor. Aqui, a disputa é na arena.</span></footer>
+        <div class="key-legend"><span><kbd>←</kbd><kbd>↑</kbd><kbd>↓</kbd><kbd>→</kbd> selecionar</span><span><kbd>Enter</kbd> jogar</span><span><kbd>Esc</kbd> início</span></div>
+      </section>
+
+      <section id="game-screen" class="screen game-screen" data-screen="game" aria-labelledby="game-title" hidden>
+        <div class="screen-heading game-heading"><button id="game-back" class="back-button"><span aria-hidden="true">‹</span> Personagens</button><h1 id="game-title">Praça da Disputa</h1><button id="pause-button" class="pause-button" aria-label="Pausar partida" disabled>Ⅱ <span>Pausar</span></button></div>
+        <div class="game-stage"><div id="participants" class="participants" aria-label="Participantes da partida"></div><div class="arcade-cabinet"><div class="scoreboard"><span id="match-state">Prepare-se</span><strong id="timer">02:30</strong><span class="arena-size">15 × 13</span></div><div class="canvas-wrap"><canvas id="arena" width="480" height="416" tabindex="0" aria-label="Arena do Bomber Políticos. Use WASD ou setas para mover e espaço para colocar bombas."></canvas><div id="arena-overlay" class="arena-overlay" hidden><div class="overlay-panel"><div id="overlay-title"></div><p id="overlay-text"></p><button id="overlay-button" class="arcade-button primary-button" hidden>Continuar</button><button id="overlay-secondary" class="text-button" hidden>Trocar personagem</button></div></div></div><div class="arena-bottom"><span><i class="pixel-bomb" aria-hidden="true"></i><b id="bomb-stat">1</b> bomba</span><span><i class="pixel-flame" aria-hidden="true"></i><b id="range-stat">2</b> alcance</span><span><i class="pixel-boot" aria-hidden="true"></i><b id="speed-stat">1</b> velocidade</span></div></div></div>
+        <div class="key-legend"><span><kbd>WASD</kbd> ou <kbd>↑←↓→</kbd> mover</span><span><kbd>Espaço</kbd> bomba</span><span><kbd>P</kbd> / <kbd>Esc</kbd> pausa</span></div>
+      </section>
+    </main>
+    <footer class="console-footer"><span>Bomber Políticos</span><span id="screen-footer-hint">Pressione Enter para começar</span><span>Um jogo de humor</span></footer>
+  </div>
   <div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
-  <dialog id="help-dialog"><button id="close-help" class="dialog-close" aria-label="Fechar instruções">×</button><span class="eyebrow">MANUAL DO ARCADE</span><h2>Uma bomba.<br>Muitas possibilidades.</h2><p>Mova com <b>WASD ou as setas</b>. Aperte <b>espaço</b> para colocar uma bomba e fuja: ela explode em dois segundos.</p><p>Explosões seguem em cruz, param nas paredes e destroem o primeiro bloco do caminho. Uma bomba pode detonar outras em cadeia.</p><p>Os itens <b>azuis</b> aumentam a quantidade de bombas; os <b>amarelos</b>, o alcance; e os <b>roxos</b>, a velocidade.</p><p>O último sobrevivente vence. Se o tempo acabar com vários sobreviventes, ou todos forem eliminados juntos, a partida empata.</p><p><b>P ou Escape</b> pausa. Se você cair, pode assistir aos bots ou iniciar uma nova partida.</p><button id="help-ok" class="start-button">ENTENDI. BORA JOGAR ↗</button></dialog>
+  <dialog id="help-dialog"><button id="close-help" class="dialog-close" aria-label="Fechar instruções">×</button><h2>Como jogar</h2><div class="manual-controls"><span><kbd>WASD</kbd> ou <kbd>↑←↓→</kbd> mover</span><span><kbd>Espaço</kbd> bomba</span><span><kbd>P</kbd> / <kbd>Esc</kbd> pausa</span></div><p>Coloque uma bomba e saia de perto. Ela explode em <strong>dois segundos</strong>, inclusive em você.</p><p>A explosão segue em cruz, para nas paredes e destrói o primeiro bloco do caminho. Outras bombas atingidas explodem em cadeia.</p><div class="manual-items"><span><i class="pixel-bomb"></i> Mais bombas</span><span><i class="pixel-flame"></i> Mais alcance</span><span><i class="pixel-boot"></i> Mais velocidade</span></div><p>O último sobrevivente vence. A partida dura até <strong>2 minutos e 30 segundos</strong>. Se vários sobreviverem até o fim, ou todos caírem juntos, dá empate.</p><p>Se você cair, pode assistir aos bots ou escolher outro personagem.</p><button id="help-ok" class="arcade-button primary-button">Entendi</button></dialog>
 </body>
 </html>
