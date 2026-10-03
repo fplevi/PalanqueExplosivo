@@ -1,3 +1,4 @@
+import { bindTouchControls } from './touch-controls.js';
 import { Match, makeArena, seededRandom } from './engine.js';
 import { CHARACTERS, characterFor } from './characters.js';
 import { drawCharacter, renderArena } from './art.js';
@@ -110,7 +111,7 @@ function showScreen(target, { record = true, replace = false, focus = true } = {
   if (missingVictory) target = 'home';
   if (target !== 'victory') victoryAnimation = null;
   screen = target;
-  pressed.clear();
+  clearControls();
   if (target !== 'game') { phase = 'idle'; match = null; helpPaused = false; }
   if (target === 'home') { refreshSave(); titleAnimation.reset(); }
   document.body.dataset.screen = target;
@@ -279,7 +280,7 @@ function retryStory() {
 }
 
 function failStory() {
-  phase = 'failure'; pressed.clear(); $('pause-button').disabled = true;
+  phase = 'failure'; clearControls(); $('pause-button').disabled = true;
   overlay('GAME OVER', 'Você falhou em acabar com o ciclo do poder', 'Tentar novamente', true, {
     primary: retryStory, secondary: () => showScreen('home'), secondaryLabel: 'Sair',
     watch: story.semifinal ? () => {
@@ -298,7 +299,7 @@ function failStory() {
 function finishStory(view) {
   const outcome = story.resolve(view);
   if (outcome.kind === 'defeat') { failStory(); return; }
-  phase = 'result'; pressed.clear(); $('pause-button').disabled = true;
+  phase = 'result'; clearControls(); $('pause-button').disabled = true;
   if (outcome.kind === 'complete') {
     saveStory();
     if (!story.spectating) { showVictory(outcome.winner); return; }
@@ -332,7 +333,7 @@ function setPauseButton(paused) {
 
 function togglePause() {
   if (screen !== 'game' || phase !== 'playing') return;
-  match.pause(); pressed.clear();
+  match.pause(); clearControls();
   const view = match.snapshot();
   const paused = view.status === 'paused';
   setPauseButton(paused);
@@ -344,7 +345,7 @@ function togglePause() {
 
 function finish(view) {
   if (mode === 'story') { finishStory(view); return; }
-  phase = 'result'; pressed.clear(); $('pause-button').disabled = true;
+  phase = 'result'; clearControls(); $('pause-button').disabled = true;
   const winner = view.players.find(player => player.id === view.winner);
   const title = winner ? winner.id === 'human' ? 'Vitória!' : 'Fim de jogo' : 'Empate!';
   const copy = winner ? characterFor(winner.character).name + ' foi o último de pé.' : 'Ninguém levou esta partida.';
@@ -357,7 +358,7 @@ function finish(view) {
 function openHelp() {
   helpPaused = screen === 'game' && phase === 'playing' && match.snapshot().status === 'running';
   if (helpPaused) togglePause();
-  pressed.clear(); dialog.showModal();
+  clearControls(); dialog.showModal();
 }
 
 $('home-button').addEventListener('click', () => showScreen('home'));
@@ -392,7 +393,52 @@ $('sound-button').addEventListener('click', () => {
   if (!muted) tone(660, 0.07);
 });
 
+function canControlPlayer() {
+  if (screen !== 'game' || phase !== 'playing' || dialog.open || !match) return false;
+  const view = match.snapshot();
+  return view.status === 'running' && !(mode === 'story' && story.spectating)
+    && view.players.some(player => player.id === 'human' && player.alive && !player.respawning);
+}
+
+let touchControls = null;
+function clearControls() {
+  pressed.clear();
+  touchControls?.clear();
+}
+
 const movement = new Map([['arrowup', [0, -1]], ['w', [0, -1]], ['arrowright', [1, 0]], ['d', [1, 0]], ['arrowdown', [0, 1]], ['s', [0, 1]], ['arrowleft', [-1, 0]], ['a', [-1, 0]]]);
+touchControls = bindTouchControls($('play-layout'), {
+  canPlay: canControlPlayer,
+  startDirection(id, key) {
+    const direction = movement.get(key);
+    pressed.set(`touch:${id}`, { direction, time: performance.now() });
+    match.move('human', ...direction);
+  },
+  endDirection: id => pressed.delete(`touch:${id}`),
+  placeBomb: () => match.placeBomb('human'),
+});
+const touchDevice = window.matchMedia('(any-pointer: coarse)');
+function refreshTouchLayout() {
+  clearControls();
+  const hasTouch = touchDevice.matches || (navigator.maxTouchPoints ?? 0) > 0;
+  document.body.classList.toggle('touch-device', hasTouch);
+}
+touchDevice.addEventListener('change', refreshTouchLayout);
+window.addEventListener('resize', () => {
+  clearControls();
+  refreshTouchLayout();
+});
+window.addEventListener('orientationchange', () => {
+  clearControls();
+  refreshTouchLayout();
+});
+window.addEventListener('pointerdown', event => {
+  if (event.pointerType === 'touch' && !document.body.classList.contains('touch-device')) {
+    document.body.classList.add('touch-device');
+  }
+}, { passive: true });
+refreshTouchLayout();
+
 window.addEventListener('keydown', event => {
   if (dialog.open) return;
   const key = event.key.toLowerCase();
@@ -425,11 +471,11 @@ window.addEventListener('keydown', event => {
   if ((key === 'p' || key === 'escape') && !event.repeat) togglePause();
   if (match.snapshot().status !== 'running') return;
   if (mode === 'story' && story.spectating) return;
-  if (movement.has(key) && !event.repeat) { pressed.set(key, performance.now()); match.move('human', ...movement.get(key)); }
+  if (movement.has(key) && !event.repeat) { pressed.set(key, { direction: movement.get(key), time: performance.now() }); match.move('human', ...movement.get(key)); }
   if (key === ' ' && !event.repeat) match.placeBomb('human');
 });
 window.addEventListener('keyup', event => pressed.delete(event.key.toLowerCase()));
-function suspendOnBlur() { pressed.clear(); if (screen === 'game' && phase === 'playing' && match.snapshot().status === 'running') togglePause(); }
+function suspendOnBlur() { clearControls(); if (screen === 'game' && phase === 'playing' && match.snapshot().status === 'running') togglePause(); }
 window.addEventListener('blur', suspendOnBlur);
 document.addEventListener('visibilitychange', () => { if (document.hidden) suspendOnBlur(); });
 window.addEventListener('popstate', () => {
@@ -448,8 +494,8 @@ function updateGame(dt) {
     }
   }
   if (phase !== 'playing') return;
-  const latest = [...pressed].sort((a, b) => b[1] - a[1])[0];
-  if (latest && (mode !== 'story' || !story.spectating)) match.move('human', ...movement.get(latest[0]));
+  const latest = [...pressed.values()].sort((a, b) => b.time - a.time)[0];
+  if (latest && (mode !== 'story' || !story.spectating)) match.move('human', ...latest.direction);
   match.update(dt);
   const view = match.snapshot();
   for (const event of match.takeEvents()) {
@@ -493,6 +539,7 @@ function frame(now) {
     updateGame(dt);
     if (screen === 'game' && match) renderArena(ctx, match.snapshot(), now / 1000);
   }
+  touchControls?.refresh();
   requestAnimationFrame(frame);
 }
 
