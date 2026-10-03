@@ -2,19 +2,25 @@ import { characterFor } from './characters.js';
 
 export const TILE = 32;
 
+function darken(color, factor) {
+  return '#' + color.slice(1).match(/.{2}/g)
+    .map(channel => Math.round(parseInt(channel, 16) * factor).toString(16).padStart(2, '0')).join('');
+}
+
 export function drawCharacter(ctx, character, x, y, scale = 1, facing = 2, step = 0, raisedArm = 0) {
   ctx.save();
   ctx.translate(Math.round(x), Math.round(y));
   ctx.scale(scale, scale);
   const rect = (color, rx, ry, width, height) => { ctx.fillStyle = color; ctx.fillRect(rx, ry, width, height); };
   const dark = '#192c30';
-  const noseColor = '#' + character.skin.slice(1).match(/.{2}/g)
-    .map(channel => Math.round(parseInt(channel, 16) * 0.88).toString(16).padStart(2, '0')).join('');
+  const noseColor = darken(character.skin, 0.88);
+  const suitOutline = darken(character.suit, 0.82);
   const noseWidth = character.noseWidth ?? 2;
   const eyeColor = character.eyeColor ?? '#624735';
   const walk = step % 2;
   rect('rgba(9,34,23,0.26)', 1, 23, 14, 3);
-  rect(dark, 3, 12, 10, 10);
+  rect(suitOutline, 3, 12, 10, 10);
+  rect(character.suit, 3, 12, 10, 1);
   rect(character.suit, 4, 13, 8, 8);
   const shortSleeves = character.outfit === 'tshirt';
   if (raisedArm === -1) {
@@ -50,13 +56,13 @@ export function drawCharacter(ctx, character, x, y, scale = 1, facing = 2, step 
     rect(character.hair, 1, 9, 14, 2);
     rect(character.hair, 2, 11, 12, 1);
   }
-  rect(dark, 3, 1, 10, 12);
-  rect(dark, 2, 3, 12, 7);
+  rect(noseColor, 3, 1, 10, 10);
+  rect(noseColor, 2, 3, 12, 7);
   rect(character.skin, 3, 3, 10, 8);
   rect(character.skin, 5, 11, 6, 2);
   rect(character.hair, 3, 1, 10, 4);
-  rect(character.hair, 2, 4, 2, 4);
-  rect(character.hair, 12, 4, 2, 4);
+  rect(character.hair, 2, 3, 2, 5);
+  rect(character.hair, 12, 3, 2, 5);
   rect(character.hair, 4, 0, 7, 2);
   if (character.style === 'long' && facing !== 0) {
     rect(character.hair, 2, 7, 2, 8);

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prévia da vitória · Palanque Explosivo</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="console-shell">
+    <main>
+      <section class="screen home-screen victory-screen" aria-labelledby="victory-title">
+        <div class="title-lockup"><h1 id="victory-title">Vitória!</h1><span class="title-edition">Clariana Barão venceu</span></div>
+        <canvas id="victory-scene" width="640" height="224" aria-label="Prévia completa da animação de vitória"></canvas>
+        <div class="home-menu victory-menu">
+          <div class="victory-copy"><p id="victory-message" hidden>Quem diria? Você acabou com o ciclo de amor e ódio</p></div>
+          <button id="replay" class="arcade-button primary-button">Repetir animação</button>
+          <p style="font-size:12px;margin-top:18px">A prévia se repete automaticamente.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script type="module">
+    import { VictoryAnimation, drawVictoryScene } from '/src/victory-scene.js';
+    const ctx = document.getElementById('victory-scene').getContext('2d');
+    const message = document.getElementById('victory-message');
+    let animation;
+    let started;
+    function replay() {
+      animation = new VictoryAnimation('clariana');
+      started = performance.now();
+      message.hidden = true;
+    }
+    document.getElementById('replay').addEventListener('click', replay);
+    replay();
+    function frame(now) {
+      if (now - started >= 8500) replay();
+      animation.update(Math.max(0, (now - started) / 1000 - animation.time));
+      const scene = animation.snapshot();
+      drawVictoryScene(ctx, scene);
+      message.hidden = !scene.message;
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  </script>
+</body>
+</html>
