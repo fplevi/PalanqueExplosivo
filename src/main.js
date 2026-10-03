@@ -2,12 +2,14 @@ import { Match, makeArena, seededRandom } from './engine.js';
 import { CHARACTERS, characterFor } from './characters.js';
 import { drawCharacter, renderArena } from './art.js';
 import { drawTitleScene } from './title-art.js';
+import { TitleAnimation } from './title-animation.js';
 import { Story, BOSSES, STORY_SAVE_KEY, storyCharacters } from './story.js';
 
 const $ = id => document.getElementById(id);
 const arena = $('arena');
 const ctx = arena.getContext('2d');
 const titleCtx = $('title-scene').getContext('2d');
+const titleAnimation = new TitleAnimation();
 const dialog = $('help-dialog');
 const pressed = new Map();
 const routes = { home: 'inicio', selection: 'personagens', game: 'partida' };
@@ -101,7 +103,7 @@ function showScreen(target, { record = true, replace = false, focus = true } = {
   screen = target;
   pressed.clear();
   if (target !== 'game') { phase = 'idle'; match = null; helpPaused = false; }
-  if (target === 'home') refreshSave();
+  if (target === 'home') { refreshSave(); titleAnimation.reset(); }
   document.body.dataset.screen = target;
   for (const section of document.querySelectorAll('main > [data-screen]')) section.hidden = section.dataset.screen !== target;
   const hash = '#' + routes[target];
@@ -439,7 +441,11 @@ function updateGame(dt) {
 function frame(now) {
   const dt = Math.min((now - previousTime) / 1000, 0.05);
   previousTime = now;
-  if (screen === 'home') drawTitleScene(titleCtx, reducedMotion.matches ? 0 : now / 1000);
+  if (screen === 'home') {
+    if (!reducedMotion.matches) titleAnimation.update(dt);
+    const scene = reducedMotion.matches ? undefined : titleAnimation.snapshot();
+    drawTitleScene(titleCtx, reducedMotion.matches ? 0 : scene.time, scene);
+  }
   else if (screen === 'game' && match) { updateGame(dt); renderArena(ctx, match.snapshot(), now / 1000); }
   requestAnimationFrame(frame);
 }

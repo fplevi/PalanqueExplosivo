@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { drawTitleScene } from '../src/title-art.js';
 
 for (const time of [0, 1, 5]) {
-  test(`title characters show both eyes while facing each other or running at ${time}s`, () => {
+  test(`title lineup shows both eyes at ${time}s`, () => {
     const actors = [];
     const stack = [];
     let actor = null;
