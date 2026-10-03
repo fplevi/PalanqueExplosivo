@@ -1,4 +1,4 @@
-import { CHARACTERS } from './characters.js';
+import { CHARACTERS, characterFor } from './characters.js';
 import { drawCharacter, drawBomb } from './art.js';
 
 export function drawTitleScene(ctx, time = 0) {
@@ -30,12 +30,24 @@ export function drawTitleScene(ctx, time = 0) {
     rect('#435967', x + 19, 194, 3, 16);
     rect('#3a5260', x, 207, 22, 3);
   }
-  const slots = [76, 118, 160, 202, 247, 292, 338, 383, 428, 470, 512, 552];
-  for (let index = 0; index < CHARACTERS.length; index++) {
-    const scale = index === 4 || index === 5 || index === 6 || index === 7 ? 2 : 1.5;
-    const y = 190 - 28 * scale;
-    drawCharacter(ctx, CHARACTERS[index], slots[index] - 8 * scale, y, scale);
-  }
+  const runners = CHARACTERS.filter(character => character.id !== 'lula' && character.id !== 'flavio')
+    .map((character, index, roster) => {
+      const angle = time * 0.65 + index * Math.PI * 2 / roster.length;
+      const depth = Math.sin(angle);
+      const scale = 1.35 + depth * 0.15;
+      return {
+        character, depth, scale,
+        x: 320 + Math.cos(angle) * 218 - 8 * scale,
+        y: 173 + depth * 17 - 28 * scale + Math.sin(time * 12 + index) * 1.5,
+        facing: depth < 0 ? 1 : 3,
+        step: Math.floor(time * 10 + index),
+      };
+    }).sort((a, b) => a.depth - b.depth);
+  const drawRunner = runner => drawCharacter(ctx, runner.character, runner.x, runner.y, runner.scale, runner.facing, runner.step);
+  for (const runner of runners.filter(runner => runner.depth < 0)) drawRunner(runner);
+  drawCharacter(ctx, characterFor('lula'), 272, 111, 2.5, 1);
+  drawCharacter(ctx, characterFor('flavio'), 328, 111, 2.5, 3);
+  for (const runner of runners.filter(runner => runner.depth >= 0)) drawRunner(runner);
   drawBomb(ctx, 20, 162, time, 2);
   drawBomb(ctx, 572, 158, time, 2.2);
   rect('#34435d', 91, 218, 458, 3);

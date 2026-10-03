@@ -180,6 +180,7 @@ function participantConfig(random) {
 
 function drawParticipants(view) {
   $('participants').replaceChildren();
+  $('participants').style.setProperty('--participant-count', view.players.length);
   for (const player of view.players) {
     const character = characterFor(player.character);
     const card = document.createElement('div');

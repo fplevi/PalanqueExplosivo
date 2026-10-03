@@ -1,6 +1,6 @@
 # Modo história
 
-Especificação aprovada pelo usuário em 2026-10-03. Implementação em andamento.
+Especificação aprovada pelo usuário em 2026-10-03. Implementada.
 
 ## Regras confirmadas
 
@@ -28,6 +28,10 @@ Especificação aprovada pelo usuário em 2026-10-03. Implementação em andamen
 - Ao assistir, a penúltima fase termina e a final entre os dois computadores começa automaticamente. O jogador não controla nenhum dos finalistas.
 
 ## Verificação
+
+Validação automatizada: 26 testes aprovados e verificação de sintaxe de todos os módulos aprovada.
+Revisão de padrões sem achados acionáveis; revisão de especificação encontrou dois casos de borda (espaço de reaparecimento e retomada de espectador), corrigidos e cobertos por regressões.
+Verificação no navegador: escolha de modo, chefões bloqueados, fase com três vidas, progresso mantido após recarregar, Game Over com dois botões nas fases comuns e Tentar novamente restaurando ambos os participantes a três vidas e o cronômetro a 02:30. Prévia em preview.png.
 
 - Motor da partida: vidas, proteção, ordem e empates de eliminação, blocos indestrutíveis e fechamento da arena.
 - Progressão: nove duelos, ambos os caminhos de chefões, classificação em segundo lugar, desempates, espectadores, derrota e vitória final.

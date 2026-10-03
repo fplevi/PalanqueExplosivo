@@ -31,7 +31,7 @@ export function drawCharacter(ctx, character, x, y, scale = 1, facing = 2, step 
   rect(dark, 9, 21, 3, 4 - walk);
   rect('#151f27', 3, 24 + walk, 5, 2);
   rect('#151f27', 9, 25 - walk, 5, 2);
-  if (character.style === 'long') rect(character.hair, 2, 3, 12, 12);
+  if (character.style === 'long' && facing === 0) rect(character.hair, 2, 3, 12, 12);
   if (character.style === 'afro') {
     rect(character.hair, 4, -2, 8, 2);
     rect(character.hair, 2, 0, 12, 2);
@@ -48,6 +48,12 @@ export function drawCharacter(ctx, character, x, y, scale = 1, facing = 2, step 
   rect(character.hair, 2, 4, 2, 4);
   rect(character.hair, 12, 4, 2, 4);
   rect(character.hair, 4, 0, 7, 2);
+  if (character.style === 'long' && facing !== 0) {
+    rect(character.hair, 2, 7, 2, 8);
+    rect(character.hair, 12, 7, 2, 8);
+    rect(character.hair, 3, 10, 2, 7);
+    rect(character.hair, 11, 10, 2, 7);
+  }
   if (character.style === 'afro') {
     rect(character.hair, 1, 3, 3, 7);
     rect(character.hair, 12, 3, 3, 7);
@@ -228,5 +234,13 @@ export function renderArena(ctx, view, time, { lobby = false } = {}) {
     if (player.id === 'human' && !lobby) {
       ctx.fillStyle = '#ffe198'; ctx.fillRect(Math.round(px) + 6, Math.round(py) - 5, 5, 2); ctx.fillRect(Math.round(px) + 7, Math.round(py) - 3, 3, 2);
     }
+  }
+  if (view.nextBlock && view.nextBlock.in <= 0.25) {
+    const { x, y, in: delay } = view.nextBlock;
+    const height = Math.round(delay / 0.25 * 160);
+    ctx.save(); ctx.globalAlpha = 0.9;
+    drawWall(ctx, x * TILE, y * TILE - height, false);
+    ctx.fillStyle = '#f57962'; ctx.fillRect(x * TILE + 5, y * TILE - height + 5, 22, 3);
+    ctx.restore();
   }
 }
