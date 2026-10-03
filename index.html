@@ -55,7 +55,7 @@
       <section id="home-screen" class="screen home-screen" data-screen="home" aria-labelledby="home-title">
         <div class="title-lockup"><h1 id="home-title" tabindex="-1">Palanque<br>Explosivo</h1><span class="title-edition">Edição Brasil 2026</span></div>
         <canvas id="title-scene" width="640" height="224" aria-label="Cena em pixel art com personagens na arena e um horizonte inspirado em Brasília"></canvas>
-        <div class="home-menu"><p>Bombas e políticos brasileiros.<br>Seja o último de pé.</p><button id="story-button" class="arcade-button primary-button"><span class="pixel-cursor" aria-hidden="true"></span>Modo história</button><button id="begin-button" class="arcade-button story-button">Jogo rápido</button><button id="resume-story" class="text-button" hidden>Retomar história</button><p id="save-notice" class="save-notice" hidden></p></div>
+        <div class="home-menu"><p>Bombas e políticos brasileiros.<br>Seja o último de pé.</p><button id="story-button" class="arcade-button primary-button"><span class="pixel-cursor" aria-hidden="true"></span>Modo história</button><button id="begin-button" class="arcade-button story-button">Jogo rápido</button><button id="share-button" class="arcade-button share-button" type="button"><svg class="pixel-share-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor"><path d="M11 1h4v4h-4zM1 6h4v4H1zM11 11h4v4h-4zM5 7h2v1H5zM7 5h2v2H7zM9 3h2v2H9zM7 9h2v2H7zM9 11h2v2H9z"/></svg><span>Compartilhar</span></button><button id="resume-story" class="text-button" hidden>Retomar história</button><p id="save-notice" class="save-notice" hidden></p></div>
       </section>
 
       <section id="victory-screen" class="screen home-screen victory-screen" data-screen="victory" aria-labelledby="victory-title" hidden>
@@ -75,7 +75,7 @@
       </section>
 
       <section id="game-screen" class="screen game-screen" data-screen="game" aria-labelledby="game-title" hidden>
-        <div class="screen-heading game-heading"><button id="game-back" class="back-button"><span aria-hidden="true">‹</span> Personagens</button><h1 id="game-title">Praça da Disputa</h1><button id="pause-button" class="pause-button" aria-label="Pausar partida" disabled>Ⅱ <span>Pausar</span></button></div>
+        <div class="screen-heading game-heading"><button id="game-back" class="back-button"><span aria-hidden="true">‹</span> Personagens</button><h1 id="game-title">Praça da Disputa</h1><button id="pause-button" class="pause-button" aria-label="Pausar partida" disabled>⏸ <span>Pausar</span></button></div>
         <div id="play-layout" class="play-layout">
         <div class="touch-pad" role="group" aria-label="Mover personagem">
           <button class="touch-button touch-up" data-direction="arrowup" aria-label="Mover para cima" disabled>↑</button>
@@ -92,6 +92,15 @@
     </main>
   </div>
   <div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
+  <div id="toast" class="pixel-toast" role="status" aria-live="polite" aria-atomic="true" hidden>
+    <svg class="pixel-toast-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor">
+      <path d="M1 7h2v2H1zm2 2h2v2H3zm2 2h2v2H5zm2-2h2v2H7zm2-2h2v2H9zm2-2h2v2h-2zm2-2h2v2h-2z"/>
+    </svg>
+    <div class="pixel-toast-content">
+      <strong class="pixel-toast-title">Link copiado!</strong>
+      <span class="pixel-toast-desc">Área de transferência</span>
+    </div>
+  </div>
   <dialog id="help-dialog"><button id="close-help" class="dialog-close" aria-label="Fechar instruções">×</button><h2>Como jogar</h2><div class="manual-controls"><span><kbd>WASD</kbd> ou <kbd>↑←↓→</kbd> mover</span><span><kbd>Espaço</kbd> bomba</span><span><kbd>P</kbd> / <kbd>Esc</kbd> pausa</span></div><p>Na tela de toque, segure uma seta do direcional para mover e toque em Bomba com o outro dedo. Os controles ficam fora da arena.</p><p>Coloque uma bomba e saia de perto. Ela explode em <strong>dois segundos</strong>, inclusive em você.</p><p>A explosão segue em cruz, para nas paredes e destrói o primeiro bloco do caminho. Outras bombas atingidas explodem em cadeia.</p><div class="manual-items"><span><i class="pixel-bomb"></i> Mais bombas</span><span><i class="pixel-flame"></i> Mais alcance</span><span><i class="pixel-boot"></i> Mais velocidade</span></div><p>O último sobrevivente vence. Após <strong>2 minutos e 30 segundos</strong>, começa a morte súbita: blocos indestrutíveis caem em espiral e fecham a arena. Fuja da célula sinalizada; a proteção não evita esmagamento.</p><p>No Jogo rápido, cada participante tem uma vida. No Modo história, você tem três vidas e cada computador tem uma até o primeiro turno. No segundo turno, ambos os finalistas têm três vidas. São cinco fases: três partidas contra três computadores, o primeiro turno contra Lula e Flávio e a final 1x1. Tentar novamente reinicia a fase do zero. Na penúltima fase, os dois melhores avançam ao segundo turno; quem terminar em terceiro pode assistir às duas disputas finais. O progresso é salvo neste navegador; ao retomar, a fase começa do zero.</p><button id="help-ok" class="arcade-button primary-button">Entendi</button></dialog>
 </body>
 </html>

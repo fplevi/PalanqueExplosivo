@@ -38,6 +38,63 @@ let secondaryAction = null;
 let watchAction = null;
 let storageAvailable = true;
 let savedStory = readStory();
+let toastTimer = null;
+let toastLeaveTimer = null;
+
+function showToast() {
+  const toast = $('toast');
+  if (!toast) return;
+  if (toastTimer) clearTimeout(toastTimer);
+  if (toastLeaveTimer) clearTimeout(toastLeaveTimer);
+
+  toast.hidden = false;
+  toast.removeAttribute('data-leaving');
+  void toast.offsetWidth;
+
+  toastTimer = setTimeout(() => {
+    toast.setAttribute('data-leaving', 'true');
+    toastLeaveTimer = setTimeout(() => {
+      toast.hidden = true;
+      toast.removeAttribute('data-leaving');
+    }, 180);
+  }, 2800);
+}
+
+async function copyGameLink() {
+  const url = `${window.location.origin}${window.location.pathname}`;
+  let copied = false;
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(url);
+      copied = true;
+    }
+  } catch {
+    // fallback below
+  }
+
+  if (!copied) {
+    try {
+      const textarea = document.createElement('textarea');
+      textarea.value = url;
+      textarea.setAttribute('readonly', '');
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      textarea.style.pointerEvents = 'none';
+      document.body.appendChild(textarea);
+      textarea.select();
+      copied = document.execCommand('copy');
+      document.body.removeChild(textarea);
+    } catch {
+      copied = false;
+    }
+  }
+
+  if (copied) {
+    showToast();
+    sound('pickup');
+    announce('Link do jogo copiado para a área de transferência.');
+  }
+}
 
 function readStory() {
   try { return Story.restore(localStorage.getItem(STORY_SAVE_KEY)); }
@@ -364,6 +421,7 @@ function openHelp() {
 $('home-button').addEventListener('click', () => showScreen('home'));
 $('begin-button').addEventListener('click', () => chooseMode('quick'));
 $('story-button').addEventListener('click', () => chooseMode('story'));
+$('share-button').addEventListener('click', copyGameLink);
 $('victory-restart').addEventListener('click', () => chooseMode('story'));
 $('victory-exit').addEventListener('click', () => showScreen('home'));
 $('resume-story').addEventListener('click', () => {
