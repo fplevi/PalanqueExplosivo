@@ -72,15 +72,13 @@ export function drawCharacter(ctx, character, x, y, scale = 1, facing = 2, step 
     rect('#00000015', 4, 9, 8, 2);
     rect(character.suit, 5, 13, 6, 7);
   } else {
+    rect(eyeColor, 5, 7, 1, 1);
+    rect(eyeColor, 10, 7, 1, 1);
     if (facing === 1) {
-      rect(eyeColor, 10, 7, 1, 1);
       rect(noseColor, 13, 7, noseWidth, 2);
     } else if (facing === 3) {
-      rect(eyeColor, 5, 7, 1, 1);
       rect(noseColor, 3 - noseWidth, 7, noseWidth, 2);
     } else {
-      rect(eyeColor, 5, 7, 1, 1);
-      rect(eyeColor, 10, 7, 1, 1);
       rect(noseColor, Math.floor((16 - noseWidth) / 2), 8, noseWidth, 2);
     }
     if (character.glasses) {
