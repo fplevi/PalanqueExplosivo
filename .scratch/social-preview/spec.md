@@ -1,6 +1,6 @@
 # Preview de compartilhamento e SEO
 
-Status: ready-for-agent
+Status: resolved
 
 ## Pedido
 
@@ -29,3 +29,7 @@ Não há garantia de posição nem de indexação. Não solicitar acesso ao Sear
 Os 45 testes, a verificação de sintaxe, o build e `git diff --check` passaram. Conferidos no HTML inicial canonical, Open Graph, Twitter Card e JSON-LD válido. A imagem JPEG mede 1200 × 630 e pesa 55.740 bytes. O sitemap tem somente a URL canônica; a página de composição não acompanha o artefato. No servidor de verificação, página, imagem e sitemap responderam HTTP 200 com os tipos corretos. O navegador abriu o pacote com os metadados esperados e sem erros de console.
 
 Também foi removido do README o parágrafo de instruções de configuração do GitHub Pages, conforme pedido do usuário.
+
+## Publicação
+
+Publicado em 2026-10-03 no commit `7ba898a`. O workflow `37141366169` terminou com sucesso (build e deploy). O HTML público contém canonical, Open Graph, Twitter Card e VideoGame; o navegador abriu sem erros de console. A imagem pública respondeu HTTP 200 como JPEG e teve o mesmo SHA-256 do arquivo local. O sitemap público também respondeu HTTP 200 com a URL correta.
