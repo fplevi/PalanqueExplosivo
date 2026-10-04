@@ -243,7 +243,7 @@ function selectCharacter(character, focus = false) {
   }
   $('selected-name').textContent = character.name;
   $('selected-full-name').textContent = character.fullName;
-  $('selected-full-name').hidden = character.fullName === character.name;
+  $('selected-full-name').hidden = false;
   $('selected-party').textContent = character.party;
   $('start-label').textContent = 'Jogar com ' + character.name;
   paintAvatar($('selected-avatar'), character, 8);
