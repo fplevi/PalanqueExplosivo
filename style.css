@@ -39,6 +39,13 @@ body[data-screen=game] .topbar{height:60px}
 @media(max-width:510px){.selection-hint{font-size:12px}.player-marker{display:inline-block;font-size:10px;padding:5px}.screen-heading h1{font-size:18px}.game-over #overlay-title{font-size:20px}.overlay-panel p{margin-bottom:14px}.overlay-panel>.text-button{margin-top:6px}.overlay-panel .arcade-button{min-height:40px;padding:9px 14px}}
 
 /* Touch controls occupy their own grid cells, never the arena. */
+.match-controls{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.spectator-speed{font:inherit;font-size:13px;color:var(--light);background:var(--panel);border:1px solid #6d7a95;border-radius:0;padding:7px 5px;cursor:pointer}
+.spectator-speed:hover{background:#475473}
+.spectator-speed:focus-visible{outline:3px solid var(--gold);outline-offset:5px}
+.game-heading h1{min-width:0}
+@media(max-width:510px){.match-controls{gap:5px}.spectator-speed{font-size:11px;padding:6px 2px}}
+
 .touch-pad,.touch-action,.touch-hint{display:none}
 .touch-device .play-layout{--control-size:48px;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:12px;max-width:640px;margin:auto}
 .touch-device .game-stage{grid-column:1 / -1;grid-row:1;width:min(100%,max(160px,calc((100svh - 380px)*15/13)))}

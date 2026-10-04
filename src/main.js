@@ -24,6 +24,7 @@ let screen = 'home';
 let selected = CHARACTERS[0];
 let phase = 'idle';
 let match = null;
+let spectatorSpeed = 1;
 let countdown = 3;
 let countdownNumber = 0;
 let muted = true;
@@ -311,10 +312,13 @@ function start() {
 }
 
 function startMatch() {
+  if (mode !== 'story' || !story.spectating) spectatorSpeed = 1;
+  $('spectator-speed').value = String(spectatorSpeed);
   const random = seededRandom(++seed * 991);
   match = new Match({ arena: makeArena(random), players: mode === 'story' ? story.participants() : participantConfig(random), random,
     lives: 1, difficulty: mode === 'story' ? 0.2 + story.stage / (story.totalStages - 1) * 0.8 : 1 });
   phase = 'countdown'; countdown = 3; countdownNumber = 0;
+  refreshSpectatorSpeed(match.snapshot());
   showScreen('game');
   drawParticipants(match.snapshot());
   $('game-title').textContent = mode === 'story' ? story.title : 'Jogo rápido · Praça da Disputa';
@@ -381,6 +385,18 @@ function finishStory(view) {
   announce($('overlay-title').textContent + ' ' + $('overlay-text').textContent);
 }
 
+function isWatching(view) {
+  return (mode === 'story' && story.spectating)
+    || !view.players.some(player => player.id === 'human' && player.alive && !player.bot);
+}
+
+function refreshSpectatorSpeed(view) {
+  const available = phase === 'playing' && isWatching(view)
+    && (view.status === 'running' || view.status === 'paused');
+  $('spectator-speed').hidden = !available;
+  $('spectator-speed').disabled = !available;
+}
+
 function setPauseButton(paused) {
   $('pause-button').replaceChildren(document.createTextNode(paused ? '▶ ' : 'Ⅱ '));
   const label = document.createElement('span'); label.textContent = paused ? 'Continuar' : 'Pausar';
@@ -433,6 +449,12 @@ $('selection-back').addEventListener('click', () => showScreen('home'));
 $('game-back').addEventListener('click', () => showScreen(mode === 'story' ? 'home' : 'selection'));
 $('start-button').addEventListener('click', start);
 $('pause-button').addEventListener('click', togglePause);
+$('spectator-speed').addEventListener('change', () => {
+  const speed = Number($('spectator-speed').value);
+  if ($('spectator-speed').disabled || ![1, 1.5, 2, 2.5, 3].includes(speed)) return;
+  spectatorSpeed = speed;
+  announce(`Velocidade ao assistir: ${$('spectator-speed').selectedOptions[0].textContent}.`);
+});
 $('overlay-button').addEventListener('click', () => primaryAction ? primaryAction() : phase === 'result' ? startMatch() : togglePause());
 $('overlay-secondary').addEventListener('click', () => secondaryAction?.());
 $('overlay-watch').addEventListener('click', () => watchAction?.());
@@ -499,6 +521,7 @@ refreshTouchLayout();
 
 window.addEventListener('keydown', event => {
   if (dialog.open) return;
+  if (event.target instanceof Element && event.target.closest('select')) return;
   const key = event.key.toLowerCase();
   const onButton = event.target instanceof Element && event.target.closest('button');
   if (screen === 'victory') {
@@ -554,7 +577,7 @@ function updateGame(dt) {
   if (phase !== 'playing') return;
   const latest = [...pressed.values()].sort((a, b) => b.time - a.time)[0];
   if (latest && (mode !== 'story' || !story.spectating)) match.move('human', ...latest.direction);
-  match.update(dt);
+  match.update(dt * (isWatching(match.snapshot()) ? spectatorSpeed : 1));
   const view = match.snapshot();
   for (const event of match.takeEvents()) {
     sound(event.type);
@@ -595,7 +618,11 @@ function frame(now) {
   else if (screen === 'victory' && victoryAnimation) renderVictory(dt);
   else if (screen === 'game' && match) {
     updateGame(dt);
-    if (screen === 'game' && match) renderArena(ctx, match.snapshot(), now / 1000);
+    if (screen === 'game' && match) {
+      const view = match.snapshot();
+      refreshSpectatorSpeed(view);
+      renderArena(ctx, view, now / 1000);
+    }
   }
   touchControls?.refresh();
   requestAnimationFrame(frame);
