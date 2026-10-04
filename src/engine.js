@@ -69,17 +69,19 @@ export class Match {
   }
 
   walkable(x, y) {
-    return this.arena[y]?.[x] === 'floor' && !this.bombs.some(bomb => {
-      if (bomb.x === x && bomb.y === y) return true;
-      const direction = DIRECTIONS[bomb.slideDirection];
-      return direction && bomb.x + direction[0] === x && bomb.y + direction[1] === y;
-    });
+    return this.arena[y]?.[x] === 'floor' && !this.bombs.some(bomb => this.bombOccupies(bomb, x, y));
+  }
+
+  bombOccupies(bomb, x, y) {
+    if (bomb.x === x && bomb.y === y) return true;
+    const direction = DIRECTIONS[bomb.slideDirection];
+    return Boolean(direction && bomb.x + direction[0] === x && bomb.y + direction[1] === y);
   }
 
   canSlideBomb(bomb, dx, dy) {
     const x = bomb.x + dx, y = bomb.y + dy;
     return this.arena[y]?.[x] === 'floor'
-      && !this.bombs.some(other => other !== bomb && other.x === x && other.y === y)
+      && !this.bombs.some(other => other !== bomb && this.bombOccupies(other, x, y))
       && !this.players.some(player => player.alive && !player.respawning && player.x === x && player.y === y);
   }
 

@@ -30,4 +30,8 @@ Testar pela API pública de `Match`: construção com arena/itens/RNG controlado
 
 ## Validação
 
-70 testes passaram, incluindo 19 cenários novos do chute; sintaxe, build e `git diff --check` concluídos. Sprite ampliado inspecionado no navegador. As quatro abas da modal foram verificadas em 320×568, 390×844, 667×375, 844×390 e 1280×720: sem rolagem e com Entendi visível.
+71 testes passaram, incluindo 20 cenários novos do chute; sintaxe, build e `git diff --check` concluídos. Sprite ampliado inspecionado no navegador. As quatro abas da modal foram verificadas em 320×568, 390×844, 667×375, 844×390 e 1280×720: sem rolagem e com Entendi visível.
+
+## Revisão
+
+A revisão de padrões identificou uma orientação do glossário associada ao termo errado; corrigida. A revisão de escopo encontrou convergência de duas bombas móveis para a mesma célula, causando sobreposição visual; corrigida com reserva compartilhada de destino e teste de regressão. O predicado curto de elegibilidade de coleta permanece local nos dois usos, sem introduzir uma abstração adicional.

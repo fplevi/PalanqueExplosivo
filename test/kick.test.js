@@ -180,7 +180,7 @@ test('a bomba chutada explodes on its reached square when the original fuse expi
   assert.ok(match.takeEvents().some(event => event.type === 'explosion' && event.x === 4 && event.y === 3));
 });
 
-test('morte súbita blocks a bomba chutada and later crushes it without returning the chute budget', () => {
+test('morte súbita blocks a bomba chutada and crushes it when its square falls', () => {
   const match = new Match({ arena: emptyArena(), duration: 0.25, players: [
     { id: 'kicker', x: 4, y: 1, kick: true, invulnerable: 100 },
     { id: 'owner', x: 3, y: 1, invulnerable: 100 },
@@ -192,4 +192,19 @@ test('morte súbita blocks a bomba chutada and later crushes it without returnin
   match.update(0.2);
   assert.equal(match.snapshot().bombs.length, 0);
   assert.equal(match.snapshot().arena[1][2], 'crushed');
+});
+
+test('two bombas chutadas cannot slide into the same square at the same time', () => {
+  const match = new Match({ arena: emptyArena(), players: [
+    { id: 'a', x: 2, y: 4, kick: true }, { id: 'b', x: 4, y: 2, kick: true },
+    { id: 'ownerA', x: 3, y: 4 }, { id: 'ownerB', x: 4, y: 3 },
+  ] });
+  match.placeBomb('ownerA'); match.move('ownerA', 0, 1);
+  match.placeBomb('ownerB'); match.move('ownerB', 1, 0); match.update(0.2);
+  match.move('a', 1, 0); match.move('b', 0, 1); match.update(0.1);
+  assert.equal(match.takeEvents().filter(event => event.type === 'kick').length, 1, 'Only one bomb can reserve the shared destination');
+  assert.equal(match.snapshot().bombs[1].slideProgress ?? 0, 0);
+  match.update(0.15);
+  match.move('b', 0, 1); match.update(0.125);
+  assert.deepEqual([match.snapshot().bombs[1].x, match.snapshot().bombs[1].y], [4, 4], 'The second bomb can be kicked once the path is free');
 });
