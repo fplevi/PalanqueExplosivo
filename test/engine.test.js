@@ -137,7 +137,7 @@ test('a crushed participant is eliminated when the only remaining floor is occup
 
 test('a revealed improvement stays hidden during the blast and is collected afterward', () => {
   const arena = emptyArena(); arena[1][3] = 'block';
-  const match = new Match({ arena, players: players(), random: () => 0 });
+  const match = new Match({ arena, players: players(), random: () => 0.02 });
   match.placeBomb('human'); match.move('human', 1, 0); match.update(0.2); match.move('human', 0, 1);
   match.update(1.81);
   const hidden = match.snapshot().items.find(item => item.x === 3 && item.y === 1);

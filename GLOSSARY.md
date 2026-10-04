@@ -44,4 +44,7 @@ Obstáculo da arena que pode ser removido por uma explosão.
 
 **Parede**:
 Obstáculo permanente da arena.
+
+**Chute**:
+Habilidade que permite ao personagem impulsionar uma bomba ao entrar em contato com ela, fazendo-a deslizar pela arena.
 _Avoid_: Bloco destrutível, para obstáculos permanentes.

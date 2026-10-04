@@ -19,7 +19,7 @@ let lastVictoryWinner = null;
 let lastVictoryLoser = null;
 let lastVictoryStory = null;
 const dialog = $('help-dialog');
-for (const canvas of dialog.querySelectorAll('[data-item-sprite]')) {
+for (const canvas of document.querySelectorAll('[data-item-sprite]')) {
   const itemCtx = canvas.getContext('2d');
   itemCtx.imageSmoothingEnabled = false;
   drawItemSprite(itemCtx, canvas.dataset.itemSprite, 1, 1);
@@ -188,6 +188,7 @@ function sound(type) {
   if (type === 'explosion') tone(150, 0.2, 'triangle');
   else if (type === 'pickup') { tone(660, 0.08); tone(880, 0.12, 'square', 0.08); }
   else if (type === 'bomb') tone(280, 0.045);
+  else if (type === 'kick') tone(180, 0.07, 'triangle');
   else if (type === 'finished') { tone(440, 0.12); tone(660, 0.12, 'square', 0.14); tone(880, 0.2, 'square', 0.28); }
 }
 
@@ -367,6 +368,7 @@ function startMatch() {
   $('pause-button').disabled = true;
   setPauseButton(false);
   for (const [id, value] of [['bomb-stat', 1], ['range-stat', 2], ['speed-stat', 1]]) $(id).textContent = value;
+  $('kick-stat').hidden = true;
   overlay('3', 'A partida já vai começar.');
   announce('A partida começa em três segundos.');
 }
@@ -637,6 +639,7 @@ function updateGame(dt) {
       }
     }
     if (event.type === 'life-lost' && event.id === 'human' && event.lives > 0) announce(`Você perdeu uma vida. Restam ${event.lives}.`);
+    if (event.type === 'pickup' && event.id === 'human' && event.item === 'kick') announce('Chute adquirido. Ande contra uma bomba para chutá-la.');
     if (event.type === 'sudden-death-warning') { $('match-state').textContent = 'Morte súbita em 5 segundos!'; announce('Morte súbita em cinco segundos. Fuja dos blocos sinalizados.'); }
     if (event.type === 'sudden-death') { $('match-state').textContent = 'Morte súbita!'; announce('Morte súbita! Os blocos estão caindo.'); }
   }
@@ -649,6 +652,7 @@ function updateGame(dt) {
   $('timer').classList.toggle('danger-timer', seconds <= 30);
   const human = view.players.find(player => player.id === 'human');
   $('bomb-stat').textContent = human?.capacity ?? '—'; $('range-stat').textContent = human?.range ?? '—'; $('speed-stat').textContent = human?.speed ?? '—';
+  $('kick-stat').hidden = !human?.kick;
   if (mode === 'story' && story.failedDuringMatch(view)) { failStory(); return; }
   if (view.status === 'finished') finish(view);
 }

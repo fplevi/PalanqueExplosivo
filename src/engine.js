@@ -2,6 +2,7 @@ export const DIRECTIONS = [[0, -1], [1, 0], [0, 1], [-1, 0]];
 export const ARENA_WIDTH = 15;
 export const ARENA_HEIGHT = 13;
 const FLAME_DURATION = 0.55;
+const KICK_SPEED = 8;
 
 function fallingBlockPath(arena) {
   const cells = [];
@@ -43,13 +44,14 @@ export class Match {
       { id: 'human', x: 1, y: 1 }, { id: 'bot1', x: 13, y: 11, bot: true },
       { id: 'bot2', x: 13, y: 1, bot: true }, { id: 'bot3', x: 1, y: 11, bot: true },
     ]).map(player => ({
-      alive: true, lives, capacity: 1, range: 2, speed: 1, cooldown: 0, facing: 2,
+      alive: true, lives, capacity: 1, range: 2, speed: 1, kick: false, cooldown: 0, facing: 2,
       spawnX: player.x, spawnY: player.y, invulnerable: 0, respawning: false,
       fromX: player.x, fromY: player.y, moveDuration: 0.18, thinkIn: 0, ...player,
     }));
     this.bombs = [];
     this.flames = [];
     this.items = items.map(item => ({ ...item }));
+    this.kickItemsGenerated = this.items.filter(item => item.type === 'kick').length;
     this.events = [];
     this.remaining = duration;
     this.elapsed = 0;
@@ -67,25 +69,67 @@ export class Match {
   }
 
   walkable(x, y) {
-    return this.arena[y]?.[x] === 'floor' && !this.bombs.some(bomb => bomb.x === x && bomb.y === y);
+    return this.arena[y]?.[x] === 'floor' && !this.bombs.some(bomb => {
+      if (bomb.x === x && bomb.y === y) return true;
+      const direction = DIRECTIONS[bomb.slideDirection];
+      return direction && bomb.x + direction[0] === x && bomb.y + direction[1] === y;
+    });
+  }
+
+  canSlideBomb(bomb, dx, dy) {
+    const x = bomb.x + dx, y = bomb.y + dy;
+    return this.arena[y]?.[x] === 'floor'
+      && !this.bombs.some(other => other !== bomb && other.x === x && other.y === y)
+      && !this.players.some(player => player.alive && !player.respawning && player.x === x && player.y === y);
+  }
+
+  kickBomb(player, bomb, dx, dy) {
+    if (!player.kick || DIRECTIONS[bomb.slideDirection] || !this.canSlideBomb(bomb, dx, dy)) return false;
+    bomb.slideDirection = DIRECTIONS.findIndex(([x, y]) => x === dx && y === dy);
+    bomb.slideProgress = 0;
+    this.events.push({ type: 'kick', id: player.id, x: bomb.x, y: bomb.y });
+    return true;
+  }
+
+  slideBombs(dt) {
+    for (const bomb of this.bombs) {
+      const direction = DIRECTIONS[bomb.slideDirection];
+      if (!direction) continue;
+      const [dx, dy] = direction;
+      bomb.slideProgress += Math.min(dt, Math.max(0, bomb.fuse)) * KICK_SPEED;
+      while (bomb.slideProgress + 0.000001 >= 1) {
+        if (!this.canSlideBomb(bomb, dx, dy)) break;
+        bomb.x += dx; bomb.y += dy;
+        bomb.slideProgress = Math.max(0, bomb.slideProgress - 1);
+      }
+      if (!this.canSlideBomb(bomb, dx, dy)) {
+        bomb.slideDirection = -1;
+        bomb.slideProgress = 0;
+      }
+    }
   }
 
   move(id, dx, dy) {
     const player = this.players.find(candidate => candidate.id === id);
     if (this.status !== 'running' || !player?.alive || player.respawning || Math.abs(dx) + Math.abs(dy) !== 1) return false;
     player.facing = DIRECTIONS.findIndex(([x, y]) => x === dx && y === dy);
-    if (player.cooldown > 0 || !this.walkable(player.x + dx, player.y + dy)) return false;
+    if (player.cooldown > 0) return false;
+    const bomb = this.bombs.find(candidate => candidate.x === player.x + dx && candidate.y === player.y + dy);
+    if (bomb) this.kickBomb(player, bomb, dx, dy);
+    if (!this.walkable(player.x + dx, player.y + dy)) return false;
     player.fromX = player.x;
     player.fromY = player.y;
     player.x += dx;
     player.y += dy;
     player.moveDuration = Math.max(0.1, 0.18 - (player.speed - 1) * 0.018);
     player.cooldown = player.moveDuration;
-    const itemIndex = this.items.findIndex(item => item.x === player.x && item.y === player.y && (item.revealAt ?? 0) <= this.elapsed);
+    const itemIndex = this.items.findIndex(item => item.x === player.x && item.y === player.y
+      && (item.revealAt ?? 0) <= this.elapsed && (item.type !== 'kick' || !player.kick));
     if (itemIndex >= 0) {
       const [item] = this.items.splice(itemIndex, 1);
       const stat = { bomb: 'capacity', range: 'range', speed: 'speed' }[item.type];
       if (stat) player[stat] = Math.min(player[stat] + 1, { capacity: 5, range: 6, speed: 5 }[stat]);
+      if (item.type === 'kick') player.kick = true;
       this.events.push({ type: 'pickup', id, item: item.type, x: player.x, y: player.y });
     }
     return true;
@@ -120,8 +164,10 @@ export class Match {
     }
     for (const flame of this.flames) flame.life -= dt;
     this.flames = this.flames.filter(flame => flame.life > 0);
+    this.slideBombs(dt);
     for (const bomb of this.bombs) bomb.fuse -= dt;
-    const due = this.bombs.filter(bomb => bomb.fuse <= 0.000001);
+    const due = this.bombs.filter(bomb => bomb.fuse <= 0.000001
+      || this.flames.some(flame => flame.x === bomb.x && flame.y === bomb.y));
     if (due.length) this.explode(due);
     this.dropBlocks();
     for (const player of this.players) {
@@ -239,7 +285,11 @@ export class Match {
     this.bombs = this.bombs.filter(bomb => !detonated.has(bomb.id));
     for (const cell of destroyed.values()) {
       this.arena[cell.y][cell.x] = 'floor';
-      if (this.random() < 0.45) {
+      const drop = this.random();
+      if (drop < 0.02 && this.kickItemsGenerated < this.players.length) {
+        this.kickItemsGenerated++;
+        this.items.push({ ...cell, type: 'kick', revealAt: this.elapsed + FLAME_DURATION });
+      } else if (drop >= 0.02 && drop < 0.47) {
         const type = ['bomb', 'range', 'speed'][Math.floor(this.random() * 3)];
         this.items.push({ ...cell, type, revealAt: this.elapsed + FLAME_DURATION });
       }
@@ -310,6 +360,14 @@ export class Match {
       player.thinkIn -= dt;
       if (player.thinkIn > 0 || player.cooldown > 0) continue;
       player.thinkIn = 0.08 + (1 - this.difficulty) * 0.3;
+      const kickDirection = player.kick && DIRECTIONS.find(([dx, dy]) => {
+        const bomb = this.bombs.find(candidate => candidate.x === player.x + dx && candidate.y === player.y + dy);
+        return bomb && !DIRECTIONS[bomb.slideDirection] && this.canSlideBomb(bomb, dx, dy);
+      });
+      if (kickDirection) {
+        this.move(player.id, ...kickDirection);
+        continue;
+      }
       const route = this.escapeRoute(player);
       if (route?.length) {
         this.move(player.id, ...route[0]);
@@ -328,7 +386,7 @@ export class Match {
       }
       const hazards = this.forecast();
       const opponents = this.players.filter(other => other.alive && other.id !== player.id);
-      const goals = [...this.items.filter(item => (item.revealAt ?? 0) <= this.elapsed), ...opponents];
+      const goals = [...this.items.filter(item => (item.revealAt ?? 0) <= this.elapsed && (item.type !== 'kick' || !player.kick)), ...opponents];
       const distance = (x, y) => goals.length ? Math.min(...goals.map(goal => Math.abs(goal.x - x) + Math.abs(goal.y - y))) : 0;
       const choices = DIRECTIONS.map(([dx, dy]) => ({ dx, dy, x: player.x + dx, y: player.y + dy, jitter: this.random() * (4.6 - this.difficulty * 2) }))
         .filter(choice => this.walkable(choice.x, choice.y) && !hazards.has(`${choice.x},${choice.y}`))

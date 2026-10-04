@@ -83,7 +83,7 @@
           <button class="touch-button touch-down" data-direction="arrowdown" aria-label="Mover para baixo" disabled>↓</button>
           <button class="touch-button touch-right" data-direction="arrowright" aria-label="Mover para a direita" disabled>→</button>
         </div>
-        <div class="game-stage"><div id="participants" class="participants" aria-label="Participantes da partida"></div><div class="arcade-cabinet"><div class="scoreboard"><span id="match-state">Prepare-se</span><strong id="timer">02:30</strong></div><div class="canvas-wrap"><canvas id="arena" width="480" height="416" tabindex="0" aria-label="Arena do Palanque Explosivo. Use o direcional na tela ou WASD e setas para mover. Use o botão Bomba ou espaço para colocar bombas."></canvas><div id="arena-overlay" class="arena-overlay" hidden><div class="overlay-panel"><div id="overlay-title"></div><p id="overlay-text"></p><button id="overlay-button" class="arcade-button primary-button" hidden>Continuar</button><button id="overlay-watch" class="arcade-button story-button" hidden>Assistir</button><button id="overlay-secondary" class="text-button" hidden>Trocar personagem</button></div></div></div><div class="arena-bottom"><span><i class="pixel-bomb" aria-hidden="true"></i><b id="bomb-stat">1</b> bomba</span><span><i class="pixel-flame" aria-hidden="true"></i><b id="range-stat">2</b> alcance</span><span><i class="pixel-boot" aria-hidden="true"></i><b id="speed-stat">1</b> velocidade</span></div></div></div>
+        <div class="game-stage"><div id="participants" class="participants" aria-label="Participantes da partida"></div><div class="arcade-cabinet"><div class="scoreboard"><span id="match-state">Prepare-se</span><strong id="timer">02:30</strong></div><div class="canvas-wrap"><canvas id="arena" width="480" height="416" tabindex="0" aria-label="Arena do Palanque Explosivo. Use o direcional na tela ou WASD e setas para mover. Use o botão Bomba ou espaço para colocar bombas."></canvas><div id="arena-overlay" class="arena-overlay" hidden><div class="overlay-panel"><div id="overlay-title"></div><p id="overlay-text"></p><button id="overlay-button" class="arcade-button primary-button" hidden>Continuar</button><button id="overlay-watch" class="arcade-button story-button" hidden>Assistir</button><button id="overlay-secondary" class="text-button" hidden>Trocar personagem</button></div></div></div><div class="arena-bottom"><span><i class="pixel-bomb" aria-hidden="true"></i><b id="bomb-stat">1</b> bomba</span><span><i class="pixel-flame" aria-hidden="true"></i><b id="range-stat">2</b> alcance</span><span><i class="pixel-boot" aria-hidden="true"></i><b id="speed-stat">1</b> velocidade</span><span id="kick-stat" hidden><canvas data-item-sprite="kick" width="22" height="22" aria-hidden="true"></canvas> Chute</span></div></div></div>
         <div class="touch-action"><button id="touch-bomb" class="touch-button bomb-button" aria-label="Colocar bomba" disabled><i class="pixel-bomb" aria-hidden="true"></i><span>Bomba</span></button></div>
         </div>
         <p class="touch-hint">Segure uma seta para mover · Toque para colocar uma bomba</p>
@@ -107,6 +107,7 @@
     <div class="manual-tabs" role="tablist" aria-label="Instruções do jogo">
       <button id="help-tab-controls" role="tab" aria-selected="true" aria-controls="help-controls" tabindex="0">Controles</button>
       <button id="help-tab-arena" role="tab" aria-selected="false" aria-controls="help-arena" tabindex="-1">Arena</button>
+      <button id="help-tab-kick" role="tab" aria-selected="false" aria-controls="help-kick" tabindex="-1">Chute</button>
       <button id="help-tab-modes" role="tab" aria-selected="false" aria-controls="help-modes" tabindex="-1">Modos</button>
     </div>
     <section id="help-controls" class="manual-page" role="tabpanel" aria-labelledby="help-tab-controls" tabindex="0">
@@ -121,7 +122,13 @@
         <div><h3>Explosões</h3><p>Seguem em cruz, param nas paredes e destroem o primeiro bloco do caminho. Bombas atingidas explodem em cadeia.</p></div>
         <div><h3>Último de pé</h3><p>O último sobrevivente vence. Após <strong>2min30s</strong>, blocos indestrutíveis caem em espiral. Fuja da célula sinalizada: a proteção não evita esmagamento.</p></div>
       </div>
-      <div class="manual-items"><span><canvas data-item-sprite="bomb" width="22" height="22" aria-hidden="true"></canvas> Mais bombas</span><span><canvas data-item-sprite="range" width="22" height="22" aria-hidden="true"></canvas> Mais alcance</span><span><canvas data-item-sprite="speed" width="22" height="22" aria-hidden="true"></canvas> Mais velocidade</span></div>
+      <div class="manual-items"><span><canvas data-item-sprite="bomb" width="22" height="22" aria-hidden="true"></canvas> Mais bombas</span><span><canvas data-item-sprite="range" width="22" height="22" aria-hidden="true"></canvas> Mais alcance</span><span><canvas data-item-sprite="speed" width="22" height="22" aria-hidden="true"></canvas> Mais velocidade</span><span><canvas data-item-sprite="kick" width="22" height="22" aria-hidden="true"></canvas> Chute raro</span></div>
+    </section>
+    <section id="help-kick" class="manual-page" role="tabpanel" aria-labelledby="help-tab-kick" tabindex="0" hidden>
+      <div class="manual-columns">
+        <div><h3>Chute de bombas</h3><p>Ao coletar o item, <strong>ande contra qualquer bomba</strong> para chutá-la. Ela desliza em linha reta e para antes de um bloco, outra bomba ou personagem.</p><p>O pavio continua contando. Uma bomba parada pode ser chutada de novo.</p></div>
+        <div><h3>Uma habilidade rara</h3><p>Cada bloco destruído tem <strong>2% de chance</strong> de revelar chute. Podem aparecer até tantos itens quanto os participantes iniciais, sem garantia de aparecer algum.</p><p>Cada personagem coleta apenas um. No Modo história, dura a fase, mesmo após perder uma vida.</p></div>
+      </div>
     </section>
     <section id="help-modes" class="manual-page" role="tabpanel" aria-labelledby="help-tab-modes" tabindex="0" hidden>
       <div class="manual-columns">

@@ -1,4 +1,5 @@
 import { characterFor } from './characters.js';
+import { DIRECTIONS } from './engine.js';
 
 export const TILE = 32;
 
@@ -189,13 +190,19 @@ function drawItem(ctx, item, time) {
 
 export function drawItemSprite(ctx, type, x, y, time = 0) {
   ctx.fillStyle = '#244535'; ctx.fillRect(x - 1, y - 1, 22, 22);
-  ctx.fillStyle = { bomb: '#80cad0', range: '#ffc768', speed: '#c2aadf' }[type];
+  ctx.fillStyle = { bomb: '#80cad0', range: '#ffc768', speed: '#c2aadf', kick: '#7fd49d' }[type];
   ctx.fillRect(x, y, 20, 20);
   ctx.fillStyle = '#fffae1'; ctx.fillRect(x + 2, y + 2, 16, 2);
   if (type === 'bomb') drawBomb(ctx, x + 3, y + 5, time, 0.6);
   else if (type === 'range') {
     ctx.fillStyle = '#e86338'; ctx.fillRect(x + 8, y + 5, 6, 11); ctx.fillRect(x + 5, y + 9, 12, 6);
     ctx.fillStyle = '#fff0a6'; ctx.fillRect(x + 9, y + 9, 4, 7);
+  } else if (type === 'kick') {
+    drawBomb(ctx, x + 1, y + 4, time, 0.45);
+    ctx.fillStyle = '#41272a'; ctx.fillRect(x + 12, y + 6, 4, 8); ctx.fillRect(x + 8, y + 12, 9, 5);
+    ctx.fillStyle = '#ee8544'; ctx.fillRect(x + 13, y + 7, 2, 6); ctx.fillRect(x + 9, y + 13, 6, 3);
+    ctx.fillStyle = '#fffae1'; ctx.fillRect(x + 7, y + 17, 11, 2);
+    ctx.fillStyle = '#ffc768'; ctx.fillRect(x + 9, y + 6, 2, 2); ctx.fillRect(x + 7, y + 8, 2, 2);
   } else {
     ctx.fillStyle = '#4b4770'; ctx.fillRect(x + 8, y + 5, 6, 8); ctx.fillRect(x + 4, y + 12, 12, 4);
     ctx.fillStyle = '#f3e7d5'; ctx.fillRect(x + 3, y + 16, 14, 2);
@@ -237,7 +244,11 @@ export function renderArena(ctx, view, time, { lobby = false } = {}) {
   for (const item of view.items) if ((item.revealAt ?? 0) <= view.elapsed) drawItem(ctx, item, time);
   for (const bomb of view.bombs) {
     const pulse = bomb.fuse < 0.65 && Math.floor(time * 14) % 2;
-    drawBomb(ctx, bomb.x * TILE + 5, bomb.y * TILE + 5 - Number(pulse), time);
+    const direction = DIRECTIONS[bomb.slideDirection];
+    const progress = bomb.slideProgress ?? 0;
+    const x = bomb.x + (direction?.[0] ?? 0) * progress;
+    const y = bomb.y + (direction?.[1] ?? 0) * progress;
+    drawBomb(ctx, x * TILE + 5, y * TILE + 5 - Number(pulse), time);
   }
   for (const flame of view.flames) {
     const x = flame.x * TILE; const y = flame.y * TILE;
