@@ -23,6 +23,7 @@ export function drawCharacter(ctx, character, x, y, scale = 1, facing = 2, step 
   rect(character.suit, 3, 12, 10, 1);
   rect(character.suit, 4, 13, 8, 8);
   const shortSleeves = character.outfit === 'tshirt';
+  const collaredShirt = character.outfit === 'shirt';
   if (raisedArm === -1) {
     rect(character.suit, -2, 11, 6, 3);
     rect(character.skin, -3, 6, 3, 6);
@@ -37,7 +38,25 @@ export function drawCharacter(ctx, character, x, y, scale = 1, facing = 2, step 
     rect(character.suit, 12, 15 - walk, 3, 6);
     rect(character.skin, 12, (shortSleeves ? 18 : 20) - walk, 3, shortSleeves ? 4 : 2);
   }
-  if (shortSleeves) {
+  if (collaredShirt) {
+    const seam = darken(character.suit, 0.88);
+    const highlight = '#fff0f6';
+    if (facing !== 0) {
+      rect(seam, 7, 14, 2, 7);
+      rect(highlight, 5, 13, 2, 1);
+      rect(highlight, 6, 14, 1, 1);
+      rect(highlight, 9, 13, 2, 1);
+      rect(highlight, 9, 14, 1, 1);
+      for (const buttonY of [16, 18, 20]) rect(highlight, 8, buttonY, 1, 1);
+      rect(seam, 4, 16, 2, 1);
+      rect(seam, 10, 16, 2, 1);
+    }
+    // Cuffs follow the sleeves during walking and the raised-arm poses.
+    if (raisedArm === -1) rect(highlight, -2, 11, 1, 3);
+    else rect(highlight, 1, 18 + walk, 3, 1);
+    if (raisedArm === 1) rect(highlight, 17, 11, 1, 3);
+    else rect(highlight, 12, 19 - walk, 3, 1);
+  } else if (shortSleeves) {
     rect(character.skin, 6, 13, 4, 1);
   } else {
     rect('#e7e3ce', 6, 13, 4, 5);

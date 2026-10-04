@@ -1,6 +1,6 @@
 export const CHARACTERS = [
   { id: 'lula', name: 'Lula', fullName: 'Luiz Inácio Lula da Silva', party: 'PT', color: '#ed5c57', suit: '#273956', skin: '#e6b88d', hair: '#d9dfd7', beard: '#edf0df', style: 'short' },
-  { id: 'clariana', name: 'Clariana Barão', fullName: 'Clariana Barão', party: 'DC', color: '#71b7df', suit: '#328ab1', skin: '#dcab85', hair: '#c9b477', style: 'long' },
+  { id: 'clariana', name: 'Clariana Barão', fullName: 'Clariana Barão', party: 'DC', color: '#71b7df', suit: '#edcfdf', outfit: 'shirt', skin: '#dcab85', hair: '#c9b477', style: 'long' },
   { id: 'edmilson', name: 'Edmilson Costa', fullName: 'Edmilson Costa', party: 'PCB', color: '#dd7b55', suit: '#d92336', outfit: 'tshirt', skin: '#d4a782', hair: '#ced1c4', beard: '#e0e0d8', glasses: true, style: 'short' },
   { id: 'cury', name: 'Augusto Cury', fullName: 'Augusto Cury', party: 'Avante', color: '#f0a74f', suit: '#3e5062', skin: '#e0b188', hair: '#858171', glasses: true, glassesColor: '#a6a59b', style: 'short' },
   { id: 'flavio', name: 'Flávio Bolsonaro', fullName: 'Flávio Bolsonaro', party: 'PL', color: '#67a0d4', suit: '#1e3d68', skin: '#e9bf9c', hair: '#46352b', style: 'side' },
