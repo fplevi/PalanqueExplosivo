@@ -110,3 +110,42 @@ body[data-screen=game] .topbar{height:60px}
 .pixel-toast-desc{font-family:var(--text);font-size:13px;font-weight:700;color:#dbe4f1;line-height:1.2}
 @media(max-width:510px){.pixel-toast{top:12px;right:12px;left:12px;justify-content:center;padding:9px 12px}.pixel-toast-title{font-size:10px}.pixel-toast-desc{font-size:12px}}
 @media(prefers-reduced-motion:reduce){.pixel-toast{animation:none!important}}
+
+.manual-items canvas{width:22px;height:22px;flex-shrink:0}
+
+#help-dialog{width:min(720px,calc(100% - 32px));max-width:720px;max-height:calc(100svh - 32px);padding:24px;overflow:auto}
+#help-dialog h2{margin:0 40px 16px 0}
+.manual-tabs{display:flex;gap:6px;border-bottom:1px solid #64718b;margin-bottom:18px;padding-bottom:8px}
+.manual-tabs button{flex:1;background:#25314d;border:1px solid #64718b;padding:10px 8px;font-size:14px;color:var(--muted)}
+.manual-tabs button[aria-selected=true]{background:var(--gold);border-color:#fce4a8;color:#31314a;font-weight:700}
+.manual-tabs button:hover{border-color:var(--gold)}
+.manual-page{min-height:235px}
+.manual-columns{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.manual-page h3{font-size:15px;line-height:1.3;margin:0 0 8px;color:var(--gold)}
+#help-dialog p{font-size:14px;line-height:1.5;margin:0 0 14px}
+.manual-page p+h3{margin-top:18px}
+#help-dialog .manual-controls{flex-direction:column;gap:12px;font-size:13px}
+#help-dialog .manual-tip{border-left:3px solid var(--gold);padding:10px 12px;margin:20px 0 0;background:#29334e}
+#help-dialog .manual-items{margin-top:18px;padding:12px 0;gap:10px}
+#help-dialog .arcade-button{margin-top:18px;min-height:44px;padding:10px 18px;font-size:15px}
+@media(max-width:599px){
+  #help-dialog{padding:20px;width:calc(100% - 24px);max-height:calc(100svh - 24px)}
+  .manual-columns{grid-template-columns:1fr;gap:16px}
+  .manual-page{min-height:0}
+  #help-dialog .manual-items{flex-wrap:wrap;justify-content:flex-start;gap:12px 20px}
+}
+@media(max-height:700px){
+  #help-dialog{padding:14px;width:min(780px,calc(100% - 24px));max-width:780px;max-height:calc(100svh - 24px)}
+  #help-dialog h2{font-size:15px;margin-bottom:10px}
+  .manual-tabs{margin-bottom:12px;padding-bottom:6px}
+  .manual-tabs button{padding:7px 6px;font-size:13px}
+  .manual-page{min-height:0}
+  .manual-page h3{font-size:14px;margin-bottom:6px}
+  #help-dialog p{font-size:13px;line-height:1.4;margin-bottom:10px}
+  .manual-page p+h3{margin-top:10px}
+  .manual-columns{gap:14px}
+  #help-dialog .manual-controls{gap:8px;font-size:12px}
+  #help-dialog .manual-tip{margin-top:12px;padding:8px 10px}
+  #help-dialog .manual-items{margin-top:10px;padding:8px 0}
+  #help-dialog .arcade-button{margin-top:6px;min-height:38px;padding:8px 12px;font-size:14px}
+}

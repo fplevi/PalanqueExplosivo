@@ -184,12 +184,16 @@ function drawBlock(ctx, x, y) {
 function drawItem(ctx, item, time) {
   const x = item.x * TILE + 6;
   const y = item.y * TILE + 6 + Math.round(Math.sin(time * 4) * 1);
+  drawItemSprite(ctx, item.type, x, y, time);
+}
+
+export function drawItemSprite(ctx, type, x, y, time = 0) {
   ctx.fillStyle = '#244535'; ctx.fillRect(x - 1, y - 1, 22, 22);
-  ctx.fillStyle = { bomb: '#80cad0', range: '#ffc768', speed: '#c2aadf' }[item.type];
+  ctx.fillStyle = { bomb: '#80cad0', range: '#ffc768', speed: '#c2aadf' }[type];
   ctx.fillRect(x, y, 20, 20);
   ctx.fillStyle = '#fffae1'; ctx.fillRect(x + 2, y + 2, 16, 2);
-  if (item.type === 'bomb') drawBomb(ctx, x + 3, y + 5, time, 0.6);
-  else if (item.type === 'range') {
+  if (type === 'bomb') drawBomb(ctx, x + 3, y + 5, time, 0.6);
+  else if (type === 'range') {
     ctx.fillStyle = '#e86338'; ctx.fillRect(x + 8, y + 5, 6, 11); ctx.fillRect(x + 5, y + 9, 12, 6);
     ctx.fillStyle = '#fff0a6'; ctx.fillRect(x + 9, y + 9, 4, 7);
   } else {

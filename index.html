@@ -101,6 +101,35 @@
       <span class="pixel-toast-desc">Área de transferência</span>
     </div>
   </div>
-  <dialog id="help-dialog"><button id="close-help" class="dialog-close" aria-label="Fechar instruções">×</button><h2>Como jogar</h2><div class="manual-controls"><span><kbd>WASD</kbd> ou <kbd>↑←↓→</kbd> mover</span><span><kbd>Espaço</kbd> bomba</span><span><kbd>P</kbd> / <kbd>Esc</kbd> pausa</span></div><p>Na tela de toque, segure uma seta do direcional para mover e toque em Bomba com o outro dedo. Os controles ficam fora da arena.</p><p>Coloque uma bomba e saia de perto. Ela explode em <strong>dois segundos</strong>, inclusive em você.</p><p>A explosão segue em cruz, para nas paredes e destrói o primeiro bloco do caminho. Outras bombas atingidas explodem em cadeia.</p><div class="manual-items"><span><i class="pixel-bomb"></i> Mais bombas</span><span><i class="pixel-flame"></i> Mais alcance</span><span><i class="pixel-boot"></i> Mais velocidade</span></div><p>O último sobrevivente vence. Após <strong>2 minutos e 30 segundos</strong>, começa a morte súbita: blocos indestrutíveis caem em espiral e fecham a arena. Fuja da célula sinalizada; a proteção não evita esmagamento.</p><p>No Jogo rápido, cada participante tem uma vida. No Modo história, você tem três vidas e cada computador tem uma até o primeiro turno. No segundo turno, ambos os finalistas têm três vidas. São cinco fases: três partidas contra três computadores, o primeiro turno contra Lula e Flávio e a final 1x1. Tentar novamente reinicia a fase do zero. Na penúltima fase, os dois melhores avançam ao segundo turno; quem terminar em terceiro pode assistir às duas disputas finais. O progresso é salvo neste navegador; ao retomar, a fase começa do zero.</p><button id="help-ok" class="arcade-button primary-button">Entendi</button></dialog>
+  <dialog id="help-dialog" aria-labelledby="help-title">
+    <button id="close-help" class="dialog-close" aria-label="Fechar instruções">×</button>
+    <h2 id="help-title">Como jogar</h2>
+    <div class="manual-tabs" role="tablist" aria-label="Instruções do jogo">
+      <button id="help-tab-controls" role="tab" aria-selected="true" aria-controls="help-controls" tabindex="0">Controles</button>
+      <button id="help-tab-arena" role="tab" aria-selected="false" aria-controls="help-arena" tabindex="-1">Arena</button>
+      <button id="help-tab-modes" role="tab" aria-selected="false" aria-controls="help-modes" tabindex="-1">Modos</button>
+    </div>
+    <section id="help-controls" class="manual-page" role="tabpanel" aria-labelledby="help-tab-controls" tabindex="0">
+      <div class="manual-columns">
+        <div><h3>No teclado</h3><div class="manual-controls"><span><kbd>WASD</kbd> ou <kbd>↑←↓→</kbd> mover</span><span><kbd>Espaço</kbd> colocar bomba</span><span><kbd>P</kbd> / <kbd>Esc</kbd> pausar</span></div></div>
+        <div><h3>Na tela de toque</h3><p>Segure uma seta para mover e toque em <strong>Bomba</strong> com o outro dedo. Os controles ficam fora da arena.</p></div>
+      </div>
+      <p class="manual-tip">Coloque a bomba e saia de perto: ela explode em <strong>2 segundos</strong> e também pode atingir você.</p>
+    </section>
+    <section id="help-arena" class="manual-page" role="tabpanel" aria-labelledby="help-tab-arena" tabindex="0" hidden>
+      <div class="manual-columns">
+        <div><h3>Explosões</h3><p>Seguem em cruz, param nas paredes e destroem o primeiro bloco do caminho. Bombas atingidas explodem em cadeia.</p></div>
+        <div><h3>Último de pé</h3><p>O último sobrevivente vence. Após <strong>2min30s</strong>, blocos indestrutíveis caem em espiral. Fuja da célula sinalizada: a proteção não evita esmagamento.</p></div>
+      </div>
+      <div class="manual-items"><span><canvas data-item-sprite="bomb" width="22" height="22" aria-hidden="true"></canvas> Mais bombas</span><span><canvas data-item-sprite="range" width="22" height="22" aria-hidden="true"></canvas> Mais alcance</span><span><canvas data-item-sprite="speed" width="22" height="22" aria-hidden="true"></canvas> Mais velocidade</span></div>
+    </section>
+    <section id="help-modes" class="manual-page" role="tabpanel" aria-labelledby="help-tab-modes" tabindex="0" hidden>
+      <div class="manual-columns">
+        <div><h3>Jogo rápido</h3><p>Uma partida independente, com <strong>1 vida</strong> por participante.</p><h3>Modo história</h3><p>Você tem <strong>3 vidas</strong>; os computadores, 1 até o primeiro turno. Na final, ambos têm 3.</p><p><strong>5 fases</strong>: três arenas com três adversários, primeiro turno contra Lula e Flávio e final 1x1.</p></div>
+        <div><h3>Avançar e retomar</h3><p>Os dois melhores do primeiro turno avançam. Em terceiro, você pode assistir às duas disputas finais.</p><p><strong>Tentar novamente</strong> e retomar reiniciam a fase do zero. O progresso fica salvo neste navegador.</p></div>
+      </div>
+    </section>
+    <button id="help-ok" class="arcade-button primary-button">Entendi</button>
+  </dialog>
 </body>
 </html>

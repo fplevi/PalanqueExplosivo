@@ -1,7 +1,7 @@
 import { bindTouchControls } from './touch-controls.js';
 import { Match, makeArena, seededRandom } from './engine.js';
 import { CHARACTERS, characterFor } from './characters.js';
-import { drawCharacter, renderArena } from './art.js';
+import { drawCharacter, drawItemSprite, renderArena } from './art.js';
 import { drawTitleScene } from './title-art.js';
 import { TitleAnimation } from './title-animation.js';
 import { VictoryAnimation, drawVictoryScene, SpectatorEndingAnimation, drawSpectatorEndingScene } from './victory-scene.js';
@@ -19,6 +19,34 @@ let lastVictoryWinner = null;
 let lastVictoryLoser = null;
 let lastVictoryStory = null;
 const dialog = $('help-dialog');
+for (const canvas of dialog.querySelectorAll('[data-item-sprite]')) {
+  const itemCtx = canvas.getContext('2d');
+  itemCtx.imageSmoothingEnabled = false;
+  drawItemSprite(itemCtx, canvas.dataset.itemSprite, 1, 1);
+}
+const helpTabs = Array.from(dialog.querySelectorAll('[role="tab"]'));
+function selectHelpTab(tab, focus = false) {
+  for (const candidate of helpTabs) {
+    const active = candidate === tab;
+    candidate.setAttribute('aria-selected', String(active));
+    candidate.tabIndex = active ? 0 : -1;
+    $(candidate.getAttribute('aria-controls')).hidden = !active;
+  }
+  if (focus) tab.focus({ preventScroll: true });
+}
+for (const [index, tab] of helpTabs.entries()) {
+  tab.addEventListener('click', () => selectHelpTab(tab));
+  tab.addEventListener('keydown', event => {
+    let next;
+    if (event.key === 'ArrowRight') next = (index + 1) % helpTabs.length;
+    else if (event.key === 'ArrowLeft') next = (index + helpTabs.length - 1) % helpTabs.length;
+    else if (event.key === 'Home') next = 0;
+    else if (event.key === 'End') next = helpTabs.length - 1;
+    else return;
+    event.preventDefault();
+    selectHelpTab(helpTabs[next], true);
+  });
+}
 const pressed = new Map();
 const routes = { home: 'inicio', selection: 'personagens', game: 'partida', victory: 'vitoria' };
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -439,7 +467,7 @@ function finish(view) {
 function openHelp() {
   helpPaused = screen === 'game' && phase === 'playing' && match.snapshot().status === 'running';
   if (helpPaused) togglePause();
-  clearControls(); dialog.showModal();
+  clearControls(); selectHelpTab(helpTabs[0]); dialog.showModal();
 }
 
 $('home-button').addEventListener('click', () => showScreen('home'));
