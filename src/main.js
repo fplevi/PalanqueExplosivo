@@ -17,6 +17,7 @@ let victoryAnimation = null;
 let victoryRevealed = false;
 let lastVictoryWinner = null;
 let lastVictoryLoser = null;
+let lastVictoryStory = null;
 const dialog = $('help-dialog');
 const pressed = new Map();
 const routes = { home: 'inicio', selection: 'personagens', game: 'partida', victory: 'vitoria' };
@@ -204,6 +205,7 @@ function prepareVictory(winner, loser = null) {
 }
 
 function showVictory(winner, loser = null) {
+  lastVictoryStory = loser ? story : null;
   prepareVictory(winner, loser);
   showScreen('victory');
   renderVictory(0);
@@ -445,8 +447,13 @@ $('begin-button').addEventListener('click', () => chooseMode('quick'));
 $('story-button').addEventListener('click', () => chooseMode('story'));
 $('share-button').addEventListener('click', copyGameLink);
 function restartFromEnding() {
-  if (lastVictoryLoser && story?.spectating) retryStory();
-  else chooseMode('story');
+  if (lastVictoryLoser && lastVictoryStory) {
+    mode = 'story';
+    story = lastVictoryStory;
+    selectCharacter(characterFor(story.character));
+    story.spectating = true;
+    retryStory();
+  } else chooseMode('story');
 }
 
 $('victory-restart').addEventListener('click', restartFromEnding);
