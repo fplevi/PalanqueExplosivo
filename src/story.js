@@ -57,6 +57,7 @@ export class Story {
       id: character === this.character ? 'human' : character,
       character, x: corners[index][0], y: corners[index][1],
       bot: this.spectating || character !== this.character,
+      speedPenalty: this.final && (this.spectating || character !== this.character) ? 1 : 0,
       lives: this.tie ? 1 : this.final || (!this.spectating && character === this.character) ? 3 : 1,
     }));
   }

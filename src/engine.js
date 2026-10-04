@@ -123,7 +123,7 @@ export class Match {
     player.fromY = player.y;
     player.x += dx;
     player.y += dy;
-    player.moveDuration = Math.max(0.1, 0.18 - (player.speed - 1) * 0.018);
+    player.moveDuration = Math.max(0.1, 0.18 - (player.speed - 1 - (player.speedPenalty ?? 0)) * 0.018);
     player.cooldown = player.moveDuration;
     const itemIndex = this.items.findIndex(item => item.x === player.x && item.y === player.y
       && (item.revealAt ?? 0) <= this.elapsed && (item.type !== 'kick' || !player.kick));
