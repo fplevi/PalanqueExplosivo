@@ -1,8 +1,49 @@
 import { characterFor } from './characters.js';
 import { drawCharacter, drawBomb } from './art.js';
-import { drawTitleBackdrop } from './title-art.js';
+import { drawTitleBackdrop, drawTitleScene } from './title-art.js';
 
 export const VICTORY_MESSAGE = 'Quem diria? Você acabou com o ciclo do poder';
+export const SPECTATOR_MESSAGE = 'Você falhou em acabar com o ciclo do poder. O ciclo continua.';
+
+export class SpectatorEndingAnimation {
+  constructor(winner, loser) {
+    this.winner = characterFor(winner);
+    this.loser = characterFor(loser);
+    this.time = 0;
+  }
+
+  update(dt) { this.time = Math.min(4.1, this.time + Math.max(0, dt)); }
+
+  snapshot() {
+    const t = this.time;
+    const turn = Math.min(2, Math.floor(t / 0.9));
+    const holder = turn === 1 ? this.loser : this.winner;
+    const recipient = turn === 1 ? this.winner : this.loser;
+    const passing = t % 0.9 >= 0.35;
+    const phase = t < 2.7 ? passing ? 'passing' : 'holding'
+      : t < 3.5 ? 'holding' : t < 4.1 ? 'exploding' : 'complete';
+    return {
+      time: t, phase, winner: this.winner, loser: this.loser,
+      holder: t < 2.7 ? holder.id : this.loser.id,
+      recipient: phase === 'passing' ? recipient.id : null,
+      progress: phase === 'exploding' ? (t - 3.5) / 0.6
+        : phase === 'passing' ? (t % 0.9 - 0.35) / 0.55 : 0,
+      characters: ['lula', 'flavio'].filter(id => phase !== 'complete' || id === this.winner.id)
+        .map(id => ({ ...characterFor(id), x: id === 'lula' ? 299 : 341 })),
+      message: phase === 'complete' ? SPECTATOR_MESSAGE : null,
+    };
+  }
+}
+
+export function drawSpectatorEndingScene(ctx, scene) {
+  if (scene.phase !== 'complete') {
+    drawTitleScene(ctx, scene.time, scene);
+    return;
+  }
+  drawTitleBackdrop(ctx);
+  const winner = scene.characters[0];
+  drawCharacter(ctx, winner, winner.x - 12, 148, 1.5, 2);
+}
 
 export class VictoryAnimation {
   constructor(winner) {

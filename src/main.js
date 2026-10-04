@@ -4,7 +4,7 @@ import { CHARACTERS, characterFor } from './characters.js';
 import { drawCharacter, renderArena } from './art.js';
 import { drawTitleScene } from './title-art.js';
 import { TitleAnimation } from './title-animation.js';
-import { VictoryAnimation, drawVictoryScene } from './victory-scene.js';
+import { VictoryAnimation, drawVictoryScene, SpectatorEndingAnimation, drawSpectatorEndingScene } from './victory-scene.js';
 import { Story, BOSSES, STORY_SAVE_KEY, storyCharacters } from './story.js';
 
 const $ = id => document.getElementById(id);
@@ -16,6 +16,7 @@ const victoryCtx = $('victory-scene').getContext('2d');
 let victoryAnimation = null;
 let victoryRevealed = false;
 let lastVictoryWinner = null;
+let lastVictoryLoser = null;
 const dialog = $('help-dialog');
 const pressed = new Map();
 const routes = { home: 'inicio', selection: 'personagens', game: 'partida', victory: 'vitoria' };
@@ -164,7 +165,7 @@ function sound(type) {
 function showScreen(target, { record = true, replace = false, focus = true } = {}) {
   const guarded = target === 'game' && !match;
   if (guarded) target = 'selection';
-  if (target === 'victory' && !victoryAnimation && lastVictoryWinner) prepareVictory(lastVictoryWinner);
+  if (target === 'victory' && !victoryAnimation && lastVictoryWinner) prepareVictory(lastVictoryWinner, lastVictoryLoser);
   const missingVictory = target === 'victory' && !victoryAnimation;
   if (missingVictory) target = 'home';
   if (target !== 'victory') victoryAnimation = null;
@@ -184,20 +185,26 @@ function showScreen(target, { record = true, replace = false, focus = true } = {
     const focusTarget = target === 'game' ? arena : $(target === 'home' ? 'home-title' : target === 'victory' ? 'victory-title' : 'selection-title');
     focusTarget.focus({ preventScroll: true });
   }
-  announce(target === 'home' ? 'Tela de início.' : target === 'selection' ? 'Seleção de personagens. Use as setas e Enter para jogar.' : target === 'victory' ? 'Vitória! ' + victoryAnimation.winner.name + ' venceu o Modo história.' : 'Tela da partida.');
+  announce(target === 'home' ? 'Tela de início.' : target === 'selection' ? 'Seleção de personagens. Use as setas e Enter para jogar.' : target === 'victory' ? $('victory-title').textContent + ' ' + $('victory-winner').textContent : 'Tela da partida.');
 }
 
-function prepareVictory(winner) {
+function prepareVictory(winner, loser = null) {
   lastVictoryWinner = winner;
-  victoryAnimation = new VictoryAnimation(winner);
+  lastVictoryLoser = loser;
+  victoryAnimation = loser ? new SpectatorEndingAnimation(winner, loser) : new VictoryAnimation(winner);
   victoryRevealed = false;
-  $('victory-winner').textContent = victoryAnimation.winner.name + ' venceu';
+  $('victory-title').textContent = loser ? 'O ciclo continua' : 'Vitória!';
+  $('victory-winner').textContent = victoryAnimation.winner.name + (loser ? ' venceu o segundo turno' : ' venceu');
+  $('victory-restart').lastChild.textContent = loser ? 'Tentar novamente' : 'Nova história';
+  $('victory-scene').setAttribute('aria-label', loser
+    ? `${victoryAnimation.winner.name} e ${victoryAnimation.loser.name} trocam uma bomba. O vencedor lança a bomba no derrotado, que explode.`
+    : 'O vencedor encontra Lula e Flávio trocando uma bomba, lança outra bomba e elimina os dois');
   $('victory-message').hidden = true;
   $('arena-overlay').hidden = true;
 }
 
-function showVictory(winner) {
-  prepareVictory(winner);
+function showVictory(winner, loser = null) {
+  prepareVictory(winner, loser);
   showScreen('victory');
   renderVictory(0);
 }
@@ -206,9 +213,11 @@ function renderVictory(dt) {
   if (reducedMotion.matches) victoryAnimation.update(5.7);
   else if (!dialog.open) victoryAnimation.update(dt);
   const scene = victoryAnimation.snapshot();
-  drawVictoryScene(victoryCtx, scene);
+  if (scene.loser) drawSpectatorEndingScene(victoryCtx, scene);
+  else drawVictoryScene(victoryCtx, scene);
   if (scene.message && !victoryRevealed) {
     victoryRevealed = true;
+    $('victory-message').textContent = scene.message;
     $('victory-message').hidden = false;
     announce(scene.message);
   }
@@ -364,11 +373,8 @@ function finishStory(view) {
   if (outcome.kind === 'complete') {
     saveStory();
     if (!story.spectating) { showVictory(outcome.winner); return; }
-    const winner = characterFor(outcome.winner).name;
-    const text = `${winner} venceu o segundo turno. Você falhou em acabar com o ciclo do poder`;
-    overlay('Segundo turno encerrado', text, 'Tentar novamente', true, {
-      primary: retryStory, secondary: () => showScreen('home'), secondaryLabel: 'Sair',
-    });
+    showVictory(outcome.winner, story.finalists.find(id => id !== outcome.winner));
+    return;
   } else {
     saveStory();
     if (story.spectating) { startMatch(); return; }
@@ -438,7 +444,12 @@ $('home-button').addEventListener('click', () => showScreen('home'));
 $('begin-button').addEventListener('click', () => chooseMode('quick'));
 $('story-button').addEventListener('click', () => chooseMode('story'));
 $('share-button').addEventListener('click', copyGameLink);
-$('victory-restart').addEventListener('click', () => chooseMode('story'));
+function restartFromEnding() {
+  if (lastVictoryLoser && story?.spectating) retryStory();
+  else chooseMode('story');
+}
+
+$('victory-restart').addEventListener('click', restartFromEnding);
 $('victory-exit').addEventListener('click', () => showScreen('home'));
 $('resume-story').addEventListener('click', () => {
   if (!savedStory) return;
@@ -526,7 +537,7 @@ window.addEventListener('keydown', event => {
   const onButton = event.target instanceof Element && event.target.closest('button');
   if (screen === 'victory') {
     if (key === 'escape') { event.preventDefault(); showScreen('home'); }
-    else if (key === 'enter' && !onButton) { event.preventDefault(); chooseMode('story'); }
+    else if (key === 'enter' && !onButton) { event.preventDefault(); restartFromEnding(); }
     return;
   }
   if (screen === 'home') {

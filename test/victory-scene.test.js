@@ -1,6 +1,46 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { VictoryAnimation, drawVictoryScene, VICTORY_MESSAGE } from '../src/victory-scene.js';
+import { VictoryAnimation, drawVictoryScene, VICTORY_MESSAGE, SpectatorEndingAnimation, drawSpectatorEndingScene } from '../src/victory-scene.js';
+
+for (const [winner, loser] of [['lula', 'flavio'], ['flavio', 'lula']]) {
+  test(`${winner} ends the opening joke by passing the bomb to ${loser}, who alone explodes`, () => {
+    const animation = new SpectatorEndingAnimation(winner, loser);
+    assert.deepEqual(animation.snapshot().characters.map(actor => actor.id), ['lula', 'flavio']);
+    animation.update(0.5);
+    assert.equal(animation.snapshot().holder, winner);
+    assert.equal(animation.snapshot().recipient, loser);
+    animation.update(0.9);
+    assert.equal(animation.snapshot().holder, loser);
+    assert.equal(animation.snapshot().recipient, winner);
+    animation.update(0.9);
+    assert.equal(animation.snapshot().holder, winner);
+    assert.equal(animation.snapshot().recipient, loser);
+    animation.update(1.4);
+    const explosion = animation.snapshot();
+    assert.equal(explosion.phase, 'exploding');
+    assert.equal(explosion.holder, loser);
+    assert.equal(explosion.message, null);
+    animation.update(1);
+    const final = animation.snapshot();
+    assert.deepEqual(final.characters.map(actor => actor.id), [winner]);
+    assert.equal(final.message, 'Você falhou em acabar com o ciclo do poder. O ciclo continua.');
+    animation.update(100);
+    assert.deepEqual(animation.snapshot(), final);
+  });
+}
+
+test('spectator ending renders every phase and supports immediately showing the result', () => {
+  const ctx = { globalAlpha: 1, clearRect() {}, fillRect() {}, save() {}, restore() {}, translate() {}, scale() {} };
+  const animation = new SpectatorEndingAnimation('flavio', 'lula');
+  for (const dt of [0, 0.5, 0.9, 0.9, 0.5, 0.9, 1]) {
+    animation.update(dt);
+    drawSpectatorEndingScene(ctx, animation.snapshot());
+  }
+  const reduced = new SpectatorEndingAnimation('lula', 'flavio');
+  reduced.update(5.7);
+  assert.deepEqual(reduced.snapshot().characters.map(actor => actor.id), ['lula']);
+  assert.equal(reduced.snapshot().phase, 'complete');
+});
 
 test('the campaign winner arrives, throws a bomb, eliminates both bosses, then sees the victory message', () => {
   const animation = new VictoryAnimation('clariana');
