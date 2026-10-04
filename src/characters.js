@@ -8,7 +8,7 @@ export const CHARACTERS = [
   { id: 'renan', name: 'Renan Santos', fullName: 'Renan Santos', party: 'Missão', color: '#aa8bcd', suit: '#313b45', skin: '#d7a27b', hair: '#352c25', beard: '#47372c', beardStyle: 'stubble', style: 'side' },
   { id: 'caiado', name: 'Ronaldo Caiado', fullName: 'Ronaldo Caiado', party: 'PSD', color: '#74ac82', suit: '#466757', skin: '#deb089', hair: '#e6e4d4', style: 'side' },
   { id: 'rui', name: 'Rui Costa Pimenta', fullName: 'Rui Costa Pimenta', party: 'PCO', color: '#db776b', suit: '#7e554b', skin: '#deb086', hair: '#403b36', beard: '#77746c', beardStyle: 'stubble', glasses: true, style: 'short' },
-  { id: 'samara', name: 'Samara Martins', fullName: 'Samara Martins', party: 'UP', color: '#b096d4', suit: '#695289', skin: '#a36f4f', hair: '#342b29', style: 'afro' },
+  { id: 'samara', name: 'Samara Martins', fullName: 'Samara Martins', party: 'UP', color: '#b096d4', suit: '#222225', outfit: 'tshirt', skin: '#a36f4f', hair: '#342b29', style: 'afro' },
   { id: 'wilson', name: 'Wilson Grassi', fullName: 'Wilson Grassi', party: 'Democrata', color: '#79b9b2', suit: '#1854a1', skin: '#d9ad86', hair: '#645d51', beard: '#c1c3bf', style: 'side' },
   { id: 'zema', name: 'Romeu Zema', fullName: 'Romeu Zema', party: 'Novo', color: '#e6a363', suit: '#4e6070', skin: '#e2b68f', hair: '#77786e', glasses: true, glassesColor: '#393b3d', noseWidth: 3, style: 'short' },
 ];
